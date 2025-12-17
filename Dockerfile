@@ -11,7 +11,7 @@ COPY src ./src
 RUN mvn clean install
 
 # Stage 2: Use Tomcat to run WAR
-FROM tomcat:9.0
+FROM tomcat:9.1
 
 # Remove default webapps
 RUN rm -rf /usr/local/tomcat/webapps/*
