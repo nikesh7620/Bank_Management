@@ -1,5 +1,5 @@
 # Stage 1: Build WAR using Maven + JDK
-FROM maven:3.9.1-jdk-21 AS build
+FROM maven:3.9.1-openjdk-21 AS build
 
 WORKDIR /app
 
@@ -22,5 +22,6 @@ COPY --from=build /app/target/BankSystem-1.0-SNAPSHOT.war /usr/local/tomcat/weba
 EXPOSE 8080
 
 CMD ["catalina.sh", "run"]
+
 
 
