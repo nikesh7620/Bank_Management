@@ -17,52 +17,74 @@ public class getClientDetails extends HttpServlet {
             throws ServletException, IOException {
 
         String accountNumber = request.getParameter("accountNumber");
+        HttpSession session = request.getSession();
 
-        try (Connection con = AS400Connection.getConnection()) {
+        // Clear previous session attributes
+        session.removeAttribute("clientError");
+        session.removeAttribute("accountNumber");
+        session.removeAttribute("fullName");
+        session.removeAttribute("dob");
+        session.removeAttribute("phone");
+        session.removeAttribute("email");
+        session.removeAttribute("gender");
+        session.removeAttribute("addressLine1");
+        session.removeAttribute("addressLine2");
+        session.removeAttribute("addressLine3");
+        session.removeAttribute("city");
+        session.removeAttribute("state");
+        session.removeAttribute("country");
+        session.removeAttribute("pincode");
+        session.removeAttribute("accountType");
+        session.removeAttribute("currency");
+        session.removeAttribute("idType");
+        session.removeAttribute("idNumber");
 
-            String sql =
-                "SELECT ACCNBR, ACCTYP, CNAME, GENDER, DOB, MOBNBR, EMAIL, " +
-                "ADDR1, ADDR2, ADDR3, CITY, STATE, COUNTRY, PINCDE, " +
-                "CURR, IDTYP, IDNBR " +
-                "FROM NIKESHM1.CUSTMST WHERE ACCNBR = ?";
+        if (accountNumber == null || accountNumber.trim().isEmpty()) {
+            session.setAttribute("clientError", "Please enter a valid account number");
+            response.sendRedirect("DisplayClient.jsp");
+            return;
+        }
 
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (Connection con = AS400Connection.getConnection();
+             PreparedStatement ps = con.prepareStatement(
+                 "SELECT ACCNBR, ACCTYP, CNAME, GENDER, DOB, MOBNBR, EMAIL, " +
+                 "ADDR1, ADDR2, ADDR3, CITY, STATE, COUNTRY, PINCDE, " +
+                 "CURR, IDTYP, IDNBR FROM NIKESHM1.CUSTMST WHERE ACCNBR = ?")) {
+
             ps.setString(1, accountNumber);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    session.setAttribute("accountNumber", rs.getString("ACCNBR"));
+                    session.setAttribute("accountType", rs.getString("ACCTYP"));
+                    session.setAttribute("fullName", rs.getString("CNAME"));
+                    session.setAttribute("gender", rs.getString("GENDER"));
 
-            ResultSet rs = ps.executeQuery();
+                    Date dob = rs.getDate("DOB");
+                    session.setAttribute("dob", dob != null ? dob.toString() : "");
 
-            if (rs.next()) {
-                // Store in request attributes
-                request.setAttribute("accountNumber", rs.getString("ACCNBR"));
-                request.setAttribute("accountType", rs.getString("ACCTYP"));
-                request.setAttribute("fullName", rs.getString("CNAME"));
-                request.setAttribute("gender", rs.getString("GENDER"));
-                request.setAttribute("dob", rs.getString("DOB"));
-                request.setAttribute("phone", rs.getString("MOBNBR"));
-                request.setAttribute("email", rs.getString("EMAIL"));
-                request.setAttribute("addressLine1", rs.getString("ADDR1"));
-                request.setAttribute("addressLine2", rs.getString("ADDR2"));
-                request.setAttribute("addressLine3", rs.getString("ADDR3"));
-                request.setAttribute("city", rs.getString("CITY"));
-                request.setAttribute("state", rs.getString("STATE"));
-                request.setAttribute("country", rs.getString("COUNTRY"));
-                request.setAttribute("pincode", rs.getString("PINCDE"));
-                request.setAttribute("currency", rs.getString("CURR"));
-                request.setAttribute("idType", rs.getString("IDTYP"));
-                request.setAttribute("idNumber", rs.getString("IDNBR"));
-            } else {
-                request.setAttribute("clientError", "Account Number not found");
+                    session.setAttribute("phone", rs.getString("MOBNBR"));
+                    session.setAttribute("email", rs.getString("EMAIL"));
+                    session.setAttribute("addressLine1", rs.getString("ADDR1"));
+                    session.setAttribute("addressLine2", rs.getString("ADDR2"));
+                    session.setAttribute("addressLine3", rs.getString("ADDR3"));
+                    session.setAttribute("city", rs.getString("CITY"));
+                    session.setAttribute("state", rs.getString("STATE"));
+                    session.setAttribute("country", rs.getString("COUNTRY"));
+                    session.setAttribute("pincode", rs.getString("PINCDE"));
+                    session.setAttribute("currency", rs.getString("CURR"));
+                    session.setAttribute("idType", rs.getString("IDTYP"));
+                    session.setAttribute("idNumber", rs.getString("IDNBR"));
+                } else {
+                    session.setAttribute("clientError", "Account Number not found");
+                }
             }
-
-            rs.close();
-            ps.close();
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("clientError", "Internal Server Error. Please try again.");
+            session.setAttribute("clientError", "Internal server error. Please try again.");
         }
 
-        // Forward back to JSP
-        request.getRequestDispatcher("DisplayClient.jsp").forward(request, response);
+        // Redirect to JSP (data in session)
+        response.sendRedirect("DisplayClient.jsp");
     }
 }
