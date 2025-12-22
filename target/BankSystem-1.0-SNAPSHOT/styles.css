@@ -1,0 +1,90 @@
+    body {
+        background-color: #f5f9fc;
+    }
+
+    /* LEFT SIDEBAR */
+    .sidebar {
+        width: 220px;
+        height: 100vh;
+        background-color: #eaf2fb;
+        padding-top: 25px;
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+
+    .sidebar-title {
+        font-size: 22px;
+        font-weight: bold;
+        color: #0d6efd;
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .sidebar a {
+        text-decoration: none;
+        padding: 12px 20px;
+        display: block;
+        color: #000;
+        font-size: 16px;
+        border-radius: 8px;
+        margin: 10px;
+        background-color: white;
+        border: 1px solid #d3e3f4;
+    }
+
+    .sidebar a.active {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    /* MAIN CONTENT */
+    .main {
+        margin-left: 250px;
+        padding: 30px;
+    }
+
+    .search-box {
+        border-radius: 12px;
+    }
+
+    table {
+        border-radius: 12px;
+        overflow: hidden;
+        background-color: white;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 15px;
+        color: #fff;
+        font-size: 12px;
+    }
+
+    .not-informed { background-color: #ff4e4e; }
+    .processing { background-color: #ffa726; }
+    .in-review { background-color: #42a5f5; }
+    .informed { background-color: #4caf50; }
+    .new-card { background-color: #7e57c2; }
+
+    /* SEARCH BAR WRAPPER */
+    .search-container {
+        position: relative;
+        width: 350px;   /* Adjust width here */
+    }
+
+    /* SEARCH INPUT */
+    .search-box {
+        border-radius: 12px;
+        padding-left: 40px; /* space for icon */
+    }
+
+    /* SEARCH ICON */
+    .search-icon {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        color: gray;
+        font-size: 16px;
+    }
+
