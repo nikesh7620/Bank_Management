@@ -3,6 +3,9 @@
 .vscode/
 *.iml
 
+# Maven build output
+target/
+
 # Logs
 *.log
 
