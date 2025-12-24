@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="true" %>
+
 <%
     // Security & session check
     if (session == null || session.getAttribute("user") == null) {
@@ -18,10 +19,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Display Client Details</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
     <style>
-        body { background-color: #f8f9fa; font-family: Arial, sans-serif; margin:0; }
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            margin:0;
+        }
 
         .sidebar {
             height: 100vh;
@@ -35,6 +42,7 @@
             overflow-x: hidden;
             z-index: 999;
         }
+
         .sidebar a {
             color: white;
             display: flex;
@@ -45,6 +53,7 @@
             margin: 5px 0;
             border-radius: 4px;
         }
+
         .sidebar a i { margin-right: 10px; }
         .sidebar a:hover { background-color: #5a6268; }
         .sidebar.active { left: 0; }
@@ -62,27 +71,84 @@
             z-index: 1001;
         }
 
-        .content { max-width: 900px; margin: 0 auto; padding: 20px; transition: 0.3s; }
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            transition: 0.3s;
+        }
+
         .content.shift { margin-left: 200px; }
 
-        .form-label { font-weight:600; font-size:13px; }
-        input.form-control { font-size: 13px; padding:8px; width:100%; box-sizing:border-box; }
-        input.form-control:readonly { background-color:#eaf2fb; }
+        .form-label {
+            font-weight:600;
+            font-size:13px;
+        }
 
-        #clientError { color:#e53935; font-size:12px; margin-top:3px; }
+        input.form-control {
+            font-size: 13px;
+            padding:8px;
+            width:100%;
+            box-sizing:border-box;
+        }
 
-        .btn-primary { background-color: #1a73e8; border-color: #1a73e8; }
-        .btn-primary:hover { background-color: #155ab6; border-color: #155ab6; }
-        .btn-secondary { background-color: #6c757d; border-color: #6c757d; }
-        .btn-secondary:hover { background-color: #5a6268; border-color: #5a6268; }
+        input.form-control:readonly {
+            background-color:#eaf2fb;
+        }
 
-        .form-row { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
-        .form-row > div { flex: 1; }
-        .form-row input { width: 100%; padding:8px; box-sizing: border-box; }
+        #clientError {
+            color:#e53935;
+            font-size:12px;
+            margin-top:3px;
+        }
 
-        @media (max-width: 768px) { .form-row { flex-direction: column; } }
+        .btn-primary {
+            background-color: #1a73e8;
+            border-color: #1a73e8;
+        }
+
+        .btn-primary:hover {
+            background-color: #155ab6;
+            border-color: #155ab6;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .form-row > div {
+            flex: 1;
+        }
+
+        /* 🔹 SAME WIDTH AS FULL NAME */
+        .half-width {
+            flex: 0 0 calc(50% - 7.5px);
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            .half-width {
+                flex: 1;
+            }
+        }
     </style>
 </head>
+
 <body>
 
 <i class="fas fa-bars hamburger" id="hamburgerBtn"></i>
@@ -99,30 +165,37 @@
     <h2 class="text-center text-secondary">Client Management System</h2>
     <h3 class="text-center text-secondary">Display Client Details</h3>
 
-        <form id="clientForm" action="<%=request.getContextPath()%>/getClientDetails" method="post">    
+    <form id="clientForm" action="<%=request.getContextPath()%>/getClientDetails" method="post">
         <input type="hidden" name="redirectPage" value="DisplayClient.jsp">
 
         <!-- Account Number -->
         <div class="form-row">
-            <div>
+            <div class="half-width">
                 <label class="form-label">Account Number</label>
-                <input type="text" class="form-control" name="accountNumber" maxlength="6" 
-                       pattern="[A-Za-z0-9]{1,6}" required 
-                       value="<%= session.getAttribute("accountNumber") != null ? session.getAttribute("accountNumber") : "" %>" 
+                <input type="text" class="form-control" name="accountNumber" maxlength="6"
+                       pattern="[A-Za-z0-9]{1,6}" required
+                       value="<%= session.getAttribute("accountNumber") != null ? session.getAttribute("accountNumber") : "" %>"
                        oninput="this.value=this.value.toUpperCase()">
-                <div id="clientError"><%= session.getAttribute("clientError") != null ? session.getAttribute("clientError") : "" %></div>
+                <div id="clientError">
+                    <%= session.getAttribute("clientError") != null ? session.getAttribute("clientError") : "" %>
+                </div>
             </div>
+
+            <!-- EMPTY COLUMN TO MATCH FULL NAME WIDTH -->
+            <div></div>
         </div>
 
         <!-- Full Name & DOB -->
         <div class="form-row">
             <div>
                 <label class="form-label">Full Name</label>
-                <input type="text" class="form-control" readonly maxlength="30" value="<%= session.getAttribute("fullName") != null ? session.getAttribute("fullName") : "" %>">
+                <input type="text" class="form-control" readonly maxlength="30"
+                       value="<%= session.getAttribute("fullName") != null ? session.getAttribute("fullName") : "" %>">
             </div>
             <div>
                 <label class="form-label">Date of Birth</label>
-                <input type="date" class="form-control" readonly value="<%= session.getAttribute("dob") != null ? session.getAttribute("dob") : "" %>">
+                <input type="date" class="form-control" readonly
+                       value="<%= session.getAttribute("dob") != null ? session.getAttribute("dob") : "" %>">
             </div>
         </div>
 
@@ -130,48 +203,93 @@
         <div class="form-row">
             <div>
                 <label class="form-label">Phone Number</label>
-                <input type="text" class="form-control" readonly maxlength="15" value="<%= session.getAttribute("phone") != null ? session.getAttribute("phone") : "" %>">
+                <input type="text" class="form-control" readonly maxlength="15"
+                       value="<%= session.getAttribute("phone") != null ? session.getAttribute("phone") : "" %>">
             </div>
             <div>
                 <label class="form-label">Email</label>
-                <input type="email" class="form-control" readonly maxlength="40" value="<%= session.getAttribute("email") != null ? session.getAttribute("email") : "" %>">
+                <input type="email" class="form-control" readonly maxlength="40"
+                       value="<%= session.getAttribute("email") != null ? session.getAttribute("email") : "" %>">
             </div>
         </div>
 
         <!-- Gender -->
         <div class="form-row">
-            <div>
+            <div class="half-width">
                 <label class="form-label">Gender</label>
-                <input type="text" class="form-control" readonly maxlength="12" 
-                       value="<%= "M".equals(session.getAttribute("gender")) ? "Male" : ("F".equals(session.getAttribute("gender")) ? "Female" : ("T".equals(session.getAttribute("gender")) ? "Transgender" : "")) %>">
+                <input type="text" class="form-control" readonly maxlength="12"
+                       value="<%= "M".equals(session.getAttribute("gender")) ? "Male"
+                           : ("F".equals(session.getAttribute("gender")) ? "Female"
+                           : ("T".equals(session.getAttribute("gender")) ? "Transgender" : "")) %>">
             </div>
+
+            <!-- EMPTY COLUMN TO MATCH FULL NAME WIDTH -->
+            <div></div>
         </div>
 
         <!-- Address -->
         <div class="form-row">
-            <div><label class="form-label">Address Line 1</label><input type="text" class="form-control" readonly value="<%= session.getAttribute("addressLine1") != null ? session.getAttribute("addressLine1") : "" %>"></div>
-        </div>
-        <div class="form-row">
-            <div><label class="form-label">Address Line 2</label><input type="text" class="form-control" readonly value="<%= session.getAttribute("addressLine2") != null ? session.getAttribute("addressLine2") : "" %>"></div>
-        </div>
-        <div class="form-row">
-            <div><label class="form-label">Address Line 3</label><input type="text" class="form-control" readonly value="<%= session.getAttribute("addressLine3") != null ? session.getAttribute("addressLine3") : "" %>"></div>
-            <div><label class="form-label">Pincode</label><input type="text" class="form-control" readonly maxlength="6" value="<%= session.getAttribute("pincode") != null ? session.getAttribute("pincode") : "" %>"></div>
-        </div>
-        <div class="form-row">
-            <div><label class="form-label">City</label><input type="text" class="form-control" readonly value="<%= session.getAttribute("city") != null ? session.getAttribute("city") : "" %>"></div>
-            <div><label class="form-label">State</label><input type="text" class="form-control" readonly value="<%= session.getAttribute("state") != null ? session.getAttribute("state") : "" %>"></div>
-            <div><label class="form-label">Country</label><input type="text" class="form-control" readonly value="<%= session.getAttribute("country") != null ? session.getAttribute("country") : "" %>"></div>
+            <div><label class="form-label">Address Line 1</label>
+                <input type="text" class="form-control" readonly
+                       value="<%= session.getAttribute("addressLine1") != null ? session.getAttribute("addressLine1") : "" %>">
+            </div>
         </div>
 
-        <!-- Account Type, Currency & ID -->
         <div class="form-row">
-            <div><label class="form-label">Preferred Account Type</label><input type="text" class="form-control" readonly value="<%= session.getAttribute("accountType") != null ? session.getAttribute("accountType") : "" %>"></div>
-            <div><label class="form-label">Preferred Currency</label><input type="text" class="form-control" readonly value="<%= session.getAttribute("currency") != null ? session.getAttribute("currency") : "" %>"></div>
+            <div><label class="form-label">Address Line 2</label>
+                <input type="text" class="form-control" readonly
+                       value="<%= session.getAttribute("addressLine2") != null ? session.getAttribute("addressLine2") : "" %>">
+            </div>
         </div>
+
         <div class="form-row">
-            <div><label class="form-label">ID Type</label><input type="text" class="form-control" readonly value="<%= session.getAttribute("idType") != null ? session.getAttribute("idType") : "" %>"></div>
-            <div><label class="form-label">ID Number</label><input type="text" class="form-control" readonly value="<%= session.getAttribute("idNumber") != null ? session.getAttribute("idNumber") : "" %>"></div>
+            <div><label class="form-label">Address Line 3</label>
+                <input type="text" class="form-control" readonly
+                       value="<%= session.getAttribute("addressLine3") != null ? session.getAttribute("addressLine3") : "" %>">
+            </div>
+            <div><label class="form-label">Pincode</label>
+                <input type="text" class="form-control" readonly maxlength="6"
+                       value="<%= session.getAttribute("pincode") != null ? session.getAttribute("pincode") : "" %>">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div><label class="form-label">City</label>
+                <input type="text" class="form-control" readonly
+                       value="<%= session.getAttribute("city") != null ? session.getAttribute("city") : "" %>">
+            </div>
+            <div><label class="form-label">State</label>
+                <input type="text" class="form-control" readonly
+                       value="<%= session.getAttribute("state") != null ? session.getAttribute("state") : "" %>">
+            </div>
+            <div><label class="form-label">Country</label>
+                <input type="text" class="form-control" readonly
+                       value="<%= session.getAttribute("country") != null ? session.getAttribute("country") : "" %>">
+            </div>
+        </div>
+
+        <!-- Account / Currency -->
+        <div class="form-row">
+            <div><label class="form-label">Preferred Account Type</label>
+                <input type="text" class="form-control" readonly
+                       value="<%= session.getAttribute("accountType") != null ? session.getAttribute("accountType") : "" %>">
+            </div>
+            <div><label class="form-label">Preferred Currency</label>
+                <input type="text" class="form-control" readonly
+                       value="<%= session.getAttribute("currency") != null ? session.getAttribute("currency") : "" %>">
+            </div>
+        </div>
+
+        <!-- ID -->
+        <div class="form-row">
+            <div><label class="form-label">ID Type</label>
+                <input type="text" class="form-control" readonly
+                       value="<%= session.getAttribute("idType") != null ? session.getAttribute("idType") : "" %>">
+            </div>
+            <div><label class="form-label">ID Number</label>
+                <input type="text" class="form-control" readonly
+                       value="<%= session.getAttribute("idNumber") != null ? session.getAttribute("idNumber") : "" %>">
+            </div>
         </div>
 
         <div class="text-center mt-3">
@@ -179,8 +297,7 @@
             <button type="button" class="btn btn-secondary btn-sm" id="clearBtn">Clear</button>
         </div>
 
-        <% 
-            // --- Clear all session attributes after displaying ---
+        <%
             session.removeAttribute("accountNumber");
             session.removeAttribute("clientError");
             session.removeAttribute("fullName");
@@ -200,7 +317,6 @@
             session.removeAttribute("idType");
             session.removeAttribute("idNumber");
         %>
-
     </form>
 </div>
 
