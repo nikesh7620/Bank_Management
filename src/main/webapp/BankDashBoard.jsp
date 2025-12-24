@@ -68,6 +68,52 @@
         .pagination {
             justify-content: end;
         }
+
+        /* ---------- Responsive for Mobile ---------- */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                width: 100%;
+                height: auto;
+                padding: 10px;
+                top: 0;
+                left: 0;
+                display: flex;
+                flex-direction: row;
+                overflow-x: auto;
+                z-index: 1000;
+            }
+
+            .sidebar-title {
+                display: none; /* hide title on mobile */
+            }
+
+            .sidebar a {
+                flex: 1;
+                margin-bottom: 0;
+                padding: 8px 5px;
+                font-size: 14px;
+                white-space: nowrap;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 15px;
+                margin-top: 60px; /* space for top sidebar */
+            }
+
+            .d-flex.justify-content-end.gap-2.mb-3 {
+                flex-wrap: wrap;
+            }
+
+            .input-group {
+                flex-wrap: wrap;
+            }
+
+            table {
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 
