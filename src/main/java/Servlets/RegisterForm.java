@@ -3,7 +3,6 @@ package Servlets;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -11,8 +10,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -25,98 +26,224 @@ import utils.XMLWriter;
 @WebServlet("/RegisterForm")
 public class RegisterForm extends HttpServlet {
 
-    @Override
+    @SuppressWarnings({"CallToPrintStackTrace", "override"})
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         try {
-            // 1. BUILD XML DOCUMENT
+
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.newDocument();
 
-            Element root = doc.createElement("registrationData");
-            doc.appendChild(root);
+            Element regDataElement = doc.createElement("registrationData");
+            doc.appendChild(regDataElement);
 
-            String[] fields = {
-                "pgmname", "Name", "dob", "email", "gender",
-                "address1", "address2", "address3",
-                "pincode", "city", "state", "country",
-                "accType", "idType", "idNumber"
-            };
+            // START IF BLOCK
+            if (request.getParameter("pgmname") != null) {
 
-            for (String f : fields) {
-                String val = request.getParameter(f);
-                if (val != null && !val.isEmpty()) {
-                    Element e = doc.createElement(f);
-                    e.appendChild(doc.createTextNode(val));
-                    root.appendChild(e);
+                Element pgmElement = doc.createElement("pgmname");
+                pgmElement.appendChild(doc.createTextNode(request.getParameter("pgmname")));
+                regDataElement.appendChild(pgmElement);
+
+                // MAIN FIELDS
+                if (request.getParameter("Name") != null) {
+                    Element nameElement = doc.createElement("Name");
+                    nameElement.appendChild(doc.createTextNode(request.getParameter("Name")));
+                    regDataElement.appendChild(nameElement);
+                }
+
+                if (request.getParameter("dob") != null) {
+                    Element dobElement = doc.createElement("dob");
+                    dobElement.appendChild(doc.createTextNode(request.getParameter("dob")));
+                    regDataElement.appendChild(dobElement);
+                }
+
+                if (request.getParameter("Mobnbr") != null &&
+                        request.getParameter("countryCode") != null) {
+
+                    String countryCode = request.getParameter("countryCode");
+                    String phone = request.getParameter("Mobnbr");
+                    String fullPhone = countryCode + "-" + phone;
+
+                    Element phoneElement = doc.createElement("Mobnbr");
+                    phoneElement.appendChild(doc.createTextNode(fullPhone));
+                    regDataElement.appendChild(phoneElement);
+                }
+
+                if (request.getParameter("email") != null) {
+                    Element emailElement = doc.createElement("email");
+                    emailElement.appendChild(doc.createTextNode(request.getParameter("email")));
+                    regDataElement.appendChild(emailElement);
+                }
+
+                if (request.getParameter("gender") != null) {
+                    Element genderElement = doc.createElement("gender");
+                    genderElement.appendChild(doc.createTextNode(request.getParameter("gender")));
+                    regDataElement.appendChild(genderElement);
+                }
+
+                // ADDRESS DETAILS
+                if (request.getParameter("address1") != null) {
+                    Element add1 = doc.createElement("address1");
+                    add1.appendChild(doc.createTextNode(request.getParameter("address1")));
+                    regDataElement.appendChild(add1);
+                }
+
+                if (request.getParameter("address2") != null) {
+                    Element add2 = doc.createElement("address2");
+                    add2.appendChild(doc.createTextNode(request.getParameter("address2")));
+                    regDataElement.appendChild(add2);
+                }
+
+                if (request.getParameter("address3") != null) {
+                    Element add3 = doc.createElement("address3");
+                    add3.appendChild(doc.createTextNode(request.getParameter("address3")));
+                    regDataElement.appendChild(add3);
+                }
+
+                if (request.getParameter("pincode") != null) {
+                    Element pin = doc.createElement("pincode");
+                    pin.appendChild(doc.createTextNode(request.getParameter("pincode")));
+                    regDataElement.appendChild(pin);
+                }
+
+                if (request.getParameter("city") != null) {
+                    Element city = doc.createElement("city");
+                    city.appendChild(doc.createTextNode(request.getParameter("city")));
+                    regDataElement.appendChild(city);
+                }
+
+                if (request.getParameter("state") != null) {
+                    Element state = doc.createElement("state");
+                    state.appendChild(doc.createTextNode(request.getParameter("state")));
+                    regDataElement.appendChild(state);
+                }
+
+                if (request.getParameter("country") != null) {
+                    Element country = doc.createElement("country");
+                    country.appendChild(doc.createTextNode(request.getParameter("country")));
+                    regDataElement.appendChild(country);
+                }
+
+                // ACCOUNT DETAILS
+                if (request.getParameter("accType") != null) {
+                    Element accType = doc.createElement("accType");
+                    accType.appendChild(doc.createTextNode(request.getParameter("accType")));
+                    regDataElement.appendChild(accType);
+                }
+
+                String currency = request.getParameter("currency");
+                if (currency != null) {
+                    Element curr = doc.createElement("currency");
+
+                    if ("OTH".equals(currency)) {
+                        String actualCurrency = request.getParameter("otherCurrency");
+                        curr.appendChild(doc.createTextNode(actualCurrency != null ? actualCurrency : ""));
+                    } else {
+                        curr.appendChild(doc.createTextNode(currency));
+                    }
+
+                    regDataElement.appendChild(curr);
+                }
+
+                // ID DETAILS
+                if (request.getParameter("idType") != null) {
+                    Element idType = doc.createElement("idType");
+                    idType.appendChild(doc.createTextNode(request.getParameter("idType")));
+                    regDataElement.appendChild(idType);
+                }
+
+                if (request.getParameter("idNumber") != null) {
+                    Element idNumber = doc.createElement("idNumber");
+                    idNumber.appendChild(doc.createTextNode(request.getParameter("idNumber")));
+                    regDataElement.appendChild(idNumber);
                 }
             }
 
-            // Phone
-            String mob = request.getParameter("Mobnbr");
-            String cc = request.getParameter("countryCode");
-            if (mob != null && cc != null) {
-                Element phone = doc.createElement("Mobnbr");
-                phone.appendChild(doc.createTextNode(cc + "-" + mob));
-                root.appendChild(phone);
-            }
+            // TRANSFORM XML
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
 
-            // Currency
-            String currency = request.getParameter("currency");
-            if (currency != null) {
-                Element cur = doc.createElement("currency");
-                if ("OTH".equals(currency)) {
-                    String oth = request.getParameter("otherCurrency");
-                    cur.appendChild(doc.createTextNode(oth != null ? oth : ""));
-                } else {
-                    cur.appendChild(doc.createTextNode(currency));
-                }
-                root.appendChild(cur);
-            }
-
-            // 2. TRANSFORM XML TO STRING
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.ENCODING, "Cp037");
 
-            StringWriter sw = new StringWriter();
-            transformer.transform(new DOMSource(doc), new StreamResult(sw));
-            String xmlData = sw.toString();
+            StringWriter writer = new StringWriter();
+            transformer.transform(new DOMSource(doc), new StreamResult(writer));
 
-            // 3. WRITE INPUT XML (THREAD SAFE)
-            String inputXmlPath = XMLWriter.writeOrderToIFS(xmlData);
+            String xml = writer.toString();
 
-            // 4. CALL RPG PROGRAM
-            XMLWriter.callRPGProgram(inputXmlPath);
+            // WRITE TO IFS, CALL RPG
+            XMLWriter.writeOrderToIFS(xml);
+            XMLWriter.callRPGProgram();
 
-            // 5. READ OUTPUT XML
-            String outputXmlPath = inputXmlPath.replace("bankInp_", "bankOUT_");
-            Map<String, String> result = XMLWriter.readResponseFromIFS(outputXmlPath);
+            Map resultMsg = XMLWriter.readResponseFromIFS();
 
-            // 6. SESSION HANDLING
-            request.getSession().setAttribute("responseMessage", result.get("responseMessage"));
-            request.getSession().setAttribute("responseCode", result.get("responseCode"));
+            // STORE RESPONSE MESSAGE ALWAYS
+            request.getSession().setAttribute("responseMessage", resultMsg.get("responseMessage"));
+            request.getSession().setAttribute("responseCode", resultMsg.get("responseCode"));
 
-            if ("1".equals(result.get("responseCode"))) {
-                for (String f : fields) {
-                    request.getSession().setAttribute(f, request.getParameter(f));
-                }
-                request.getSession().setAttribute("Mobnbr", mob);
-                request.getSession().setAttribute("countryCode", cc);
-                request.getSession().setAttribute("currency", currency);
+            // SESSION HANDLING BASED ON RESPONSE CODE
+            if ("1".equals(resultMsg.get("responseCode"))) {
+
+                request.getSession().setAttribute("Name", request.getParameter("Name"));
+                request.getSession().setAttribute("dob", request.getParameter("dob"));
+                request.getSession().setAttribute("countryCode", request.getParameter("countryCode"));
+                request.getSession().setAttribute("Mobnbr", request.getParameter("Mobnbr"));
+                request.getSession().setAttribute("email", request.getParameter("email"));
+                request.getSession().setAttribute("gender", request.getParameter("gender"));
+
+                request.getSession().setAttribute("address1", request.getParameter("address1"));
+                request.getSession().setAttribute("address2", request.getParameter("address2"));
+                request.getSession().setAttribute("address3", request.getParameter("address3"));
+                request.getSession().setAttribute("pincode", request.getParameter("pincode"));
+                request.getSession().setAttribute("city", request.getParameter("city"));
+                request.getSession().setAttribute("state", request.getParameter("state"));
+                request.getSession().setAttribute("country", request.getParameter("country"));
+
+                request.getSession().setAttribute("accType", request.getParameter("accType"));
+                request.getSession().setAttribute("currency", request.getParameter("currency"));
                 request.getSession().setAttribute("otherCurrency", request.getParameter("otherCurrency"));
+
+                request.getSession().setAttribute("idType", request.getParameter("idType"));
+                request.getSession().setAttribute("idNumber", request.getParameter("idNumber"));
+
             } else {
-                request.getSession().invalidate();
+
+                request.getSession().removeAttribute("Name");
+                request.getSession().removeAttribute("dob");
+                request.getSession().removeAttribute("countryCode");
+                request.getSession().removeAttribute("Mobnbr");
+                request.getSession().removeAttribute("email");
+                request.getSession().removeAttribute("gender");
+
+                request.getSession().removeAttribute("address1");
+                request.getSession().removeAttribute("address2");
+                request.getSession().removeAttribute("address3");
+                request.getSession().removeAttribute("pincode");
+                request.getSession().removeAttribute("city");
+                request.getSession().removeAttribute("state");
+                request.getSession().removeAttribute("country");
+
+                request.getSession().removeAttribute("accType");
+                request.getSession().removeAttribute("currency");
+                request.getSession().removeAttribute("otherCurrency");
+
+                request.getSession().removeAttribute("idType");
+                request.getSession().removeAttribute("idNumber");
             }
 
-        } catch (Exception e) {
+        } catch (ParserConfigurationException | TransformerException e) {
+
             e.printStackTrace();
-            request.getSession().setAttribute("responseMessage", "✖ System Error: " + e.getMessage());
+            request.getSession().setAttribute("responseMessage", "✖ Error: " + e.getMessage());
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            request.getSession().setAttribute("responseMessage", "✖ Unexpected Error: " + e.getMessage());
         }
 
-        // 7. REDIRECT
         response.sendRedirect(request.getParameter("redirectPage"));
     }
 }
