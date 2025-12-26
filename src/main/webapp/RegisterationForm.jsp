@@ -10,7 +10,6 @@
     <!-- Bootstrap & Font Awesome -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="RegisterationForm.css" />
 
     <style>
@@ -73,12 +72,21 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         .form-title { font-size: 22px; font-weight: 600; margin-bottom: 20px; text-align: center; }
+
+        /* Inline error messages */
+        .field-error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+        #otherCurrencyInput[readonly] {
+            background-color: #e9ecef;
+        }
     </style>
 </head>
 
 <body>
-
-<%-- Clear form-related session attributes at page load --%>
+<%-- Clear session fields on load --%>
 <%
     String[] fieldsToClear = {
         "Name","dob","countryCode","Mobnbr","email","gender","address1","address2","address3",
@@ -93,7 +101,7 @@
 <i class="fas fa-bars hamburger" id="hamburgerBtn"></i>
 
 <!-- Sidebar -->
-<div class="sidebar" id="sidebar">   
+<div class="sidebar" id="sidebar">
     <a href="<%=request.getContextPath()%>/BankDashBoard.jsp"><i class="fas fa-home"></i> Dashboard</a>
     <a href="<%=request.getContextPath()%>/RegisterationForm.jsp"><i class="fas fa-user-plus"></i> Add New Client</a>
     <a href="<%=request.getContextPath()%>/DisplayClient.jsp"><i class="fas fa-users"></i> Display Client</a>
@@ -104,7 +112,7 @@
     <div class="form-container">
         <div class="form-title">Account Registration Form</div>
 
-        <form action="RegisterForm" method="post"> 
+        <form action="RegisterForm" method="post" novalidate>      
             <input type="hidden" name="redirectPage" value="RegisterationForm.jsp"/>
             <input type="hidden" name="pgmname" value="add"/>
 
@@ -112,13 +120,13 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label>Full Name *</label>
-                    <input type="text" class="form-control input-light" name="Name" autocomplete="off" minlength="1" maxlength="30" required
-                        value="<%= session.getAttribute("Name") != null ? session.getAttribute("Name") : "" %>">
+                    <input type="text" class="form-control input-light" name="Name" autocomplete="off" minlength="1" maxlength="30" required>
+                    <div class="field-error" id="nameError"></div>
                 </div>
                 <div class="col-md-6">
                     <label>Date of Birth *</label>
-                    <input type="date" class="form-control input-light" name="dob" autocomplete="off" required
-                           value="<%= session.getAttribute("dob") != null ? session.getAttribute("dob") : "" %>">
+                    <input type="date" class="form-control input-light" name="dob" autocomplete="off" required>
+                    <div class="field-error" id="dobError"></div>
                 </div>
             </div>
 
@@ -128,59 +136,58 @@
                     <label>Phone Number *</label>
                     <div class="input-group">
                         <select class="form-select input-light" name="countryCode" style="max-width: 55px;" required>
-                            <option value="+91" <%= "+91".equals(session.getAttribute("countryCode")) ? "selected" : "" %>>+91</option>
-                            <option value="+1" <%= "+1".equals(session.getAttribute("countryCode")) ? "selected" : "" %>>+1</option>
-                            <option value="+44" <%= "+44".equals(session.getAttribute("countryCode")) ? "selected" : "" %>>+44</option>
-                            <option value="+61" <%= "+61".equals(session.getAttribute("countryCode")) ? "selected" : "" %>>+61</option>
-                            <option value="+81" <%= "+81".equals(session.getAttribute("countryCode")) ? "selected" : "" %>>+81</option>
-                            <option value="+971" <%= "+971".equals(session.getAttribute("countryCode")) ? "selected" : "" %>>+971</option>
-                            <option value="+65" <%= "+65".equals(session.getAttribute("countryCode")) ? "selected" : "" %>>+65</option>
+                            <option value="+91">+91</option>
+                            <option value="+1">+1</option>
+                            <option value="+44">+44</option>
+                            <option value="+61">+61</option>
+                            <option value="+81">+81</option>
+                            <option value="+971">+971</option>
+                            <option value="+65">+65</option>
                         </select>
-                        <input type="text" class="form-control input-light" name="Mobnbr" autocomplete="off" minlength="10" maxlength="10" required
-                               value="<%= session.getAttribute("Mobnbr") != null ? session.getAttribute("Mobnbr") : "" %>">
+                        <input type="text" class="form-control input-light" name="Mobnbr" autocomplete="off" minlength="10" maxlength="10" required>
                     </div>
+                    <div class="field-error" id="phoneError"></div>
                 </div>
                 <div class="col-md-6">
                     <label>Email *</label>
-                    <input type="email" class="form-control input-light" name="email" autocomplete="off" minlength="5" maxlength="40" required
-                           value="<%= session.getAttribute("email") != null ? session.getAttribute("email") : "" %>">
+                    <input type="email" class="form-control input-light" name="email" autocomplete="off" minlength="5" maxlength="40" required>
+                    <div class="field-error" id="emailError"></div>
                 </div>
             </div>
 
             <!-- Gender -->
             <div class="mb-3">
                 <label>Gender *</label><br>
-                <input type="radio" name="gender" value="M" required <%= "M".equals(session.getAttribute("gender")) ? "checked" : "" %>> Male
-                <input type="radio" name="gender" value="F" class="ms-3" <%= "F".equals(session.getAttribute("gender")) ? "checked" : "" %>> Female
-                <input type="radio" name="gender" value="T" class="ms-3" <%= "T".equals(session.getAttribute("gender")) ? "checked" : "" %>> Transgender
+                <input type="radio" name="gender" value="M" required> Male
+                <input type="radio" name="gender" value="F" class="ms-3"> Female
+                <input type="radio" name="gender" value="T" class="ms-3"> Transgender
+                <div class="field-error" id="genderError"></div>
             </div>
 
             <!-- Address -->
             <div class="mb-3">
                 <label>Address Line 1 *</label>
-                <input type="text" class="form-control input-light" name="address1" autocomplete="off" minlength="1" maxlength="30" required
-                       value="<%= session.getAttribute("address1") != null ? session.getAttribute("address1") : "" %>">
+                <input type="text" class="form-control input-light" name="address1" autocomplete="off" minlength="1" maxlength="30" required>
+                <div class="field-error" id="address1Error"></div>
             </div>
             <div class="mb-3">
                 <label>Address Line 2</label>
-                <input type="text" class="form-control input-light" name="address2" autocomplete="off" minlength="0" maxlength="30"
-                       value="<%= session.getAttribute("address2") != null ? session.getAttribute("address2") : "" %>">
+                <input type="text" class="form-control input-light" name="address2" autocomplete="off" minlength="0" maxlength="30">
             </div>
             <div class="row mb-3">
                 <div class="col-md-4">
                     <label>Address Line 3</label>
-                    <input type="text" class="form-control input-light" name="address3" autocomplete="off" minlength="0" maxlength="30"
-                        value="<%= session.getAttribute("address3") != null ? session.getAttribute("address3") : "" %>">
+                    <input type="text" class="form-control input-light" name="address3" autocomplete="off" minlength="0" maxlength="30">
                 </div>
                 <div class="col-md-4">
                     <label>Pincode *</label>
-                    <input type="text" class="form-control input-light" name="pincode" autocomplete="off" minlength="6" maxlength="6" required
-                           value="<%= session.getAttribute("pincode") != null ? session.getAttribute("pincode") : "" %>">
+                    <input type="text" class="form-control input-light" name="pincode" autocomplete="off" minlength="6" maxlength="6" required>
+                    <div class="field-error" id="pincodeError"></div>
                 </div>
                 <div class="col-md-4">
                     <label>City *</label>
-                    <input type="text" class="form-control input-light" name="city" autocomplete="off" minlength="1" maxlength="30" required
-                           value="<%= session.getAttribute("city") != null ? session.getAttribute("city") : "" %>">
+                    <input type="text" class="form-control input-light" name="city" autocomplete="off" minlength="1" maxlength="30" required>
+                    <div class="field-error" id="cityError"></div>
                 </div>
             </div>
 
@@ -188,13 +195,13 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label>State *</label>
-                    <input type="text" class="form-control input-light" name="state" autocomplete="off" minlength="1" maxlength="30" required
-                           value="<%= session.getAttribute("state") != null ? session.getAttribute("state") : "" %>">
+                    <input type="text" class="form-control input-light" name="state" autocomplete="off" minlength="1" maxlength="30" required>
+                    <div class="field-error" id="stateError"></div>
                 </div>
                 <div class="col-md-6">
                     <label>Country *</label>
-                    <input type="text" class="form-control input-light" name="country" autocomplete="off" minlength="1" maxlength="30" required
-                           value="<%= session.getAttribute("country") != null ? session.getAttribute("country") : "" %>">
+                    <input type="text" class="form-control input-light" name="country" autocomplete="off" minlength="1" maxlength="30" required>
+                    <div class="field-error" id="countryError"></div>
                 </div>
             </div>
 
@@ -202,17 +209,18 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label>Preferred Account Type *</label><br>
-                    <input type="radio" name="accType" value="Savings" required <%= "Savings".equals(session.getAttribute("accType")) ? "checked" : "" %>> Savings
-                    <input type="radio" name="accType" value="Current" class="ms-3" <%= "Current".equals(session.getAttribute("accType")) ? "checked" : "" %>> Current    
+                    <input type="radio" name="accType" value="Savings" required> Savings
+                    <input type="radio" name="accType" value="Current" class="ms-3"> Current    
+                    <div class="field-error" id="accTypeError"></div>
                 </div>
                 <div class="col-md-6">
                     <label>Preferred Currency *</label><br>
-                    <input type="radio" name="currency" value="USD" required onclick="toggleOtherCurrency()" <%= "USD".equals(session.getAttribute("currency")) ? "checked" : "" %>> USD
-                    <input type="radio" name="currency" value="INR" class="ms-3" onclick="toggleOtherCurrency()" <%= "INR".equals(session.getAttribute("currency")) ? "checked" : "" %>> INR
-                    <input type="radio" name="currency" value="OTH" class="ms-3" onclick="toggleOtherCurrency()" <%= "OTH".equals(session.getAttribute("currency")) ? "checked" : "" %>> Other:
-                    <input type="text" class="input-light ms-2" id="otherCurrencyInput" style="width: 120px; border: 1px solid #ccc;"
-                           name="otherCurrency" minlength="3" maxlength="3"
-                           value="<%= session.getAttribute("otherCurrency") != null ? session.getAttribute("otherCurrency") : "" %>">
+                    <input type="radio" name="currency" value="USD" onclick="toggleOtherCurrency()" required> USD
+                    <input type="radio" name="currency" value="INR" class="ms-3" onclick="toggleOtherCurrency()"> INR
+                    <input type="radio" name="currency" value="OTH" class="ms-3" onclick="toggleOtherCurrency()"> Other:
+                    <input type="text" class="input-light ms-2" id="otherCurrencyInput" style="width: 120px; border: 1px solid #ccc;" name="otherCurrency" minlength="3" maxlength="3" readonly>
+                    <div class="field-error" id="currencyError"></div>
+                    <div class="field-error" id="otherCurrencyError"></div>
                 </div>
             </div>
 
@@ -222,16 +230,17 @@
                     <label>ID Type *</label>
                     <select class="form-control input-light" name="idType" required>
                         <option value="" disabled selected>Select ID Type</option>
-                        <option value="Passport" <%= "Passport".equals(session.getAttribute("idType")) ? "selected" : "" %>>Passport</option>
-                        <option value="Aadhaar Card" <%= "Aadhaar Card".equals(session.getAttribute("idType")) ? "selected" : "" %>>Aadhaar Card</option>
-                        <option value="PAN Card" <%= "PAN Card".equals(session.getAttribute("idType")) ? "selected" : "" %>>PAN Card</option>
-                        <option value="Driving License" <%= "Driving License".equals(session.getAttribute("idType")) ? "selected" : "" %>>Driving License</option>
+                        <option value="Passport">Passport</option>
+                        <option value="Aadhaar Card">Aadhaar Card</option>
+                        <option value="PAN Card">PAN Card</option>
+                        <option value="Driving License">Driving License</option>
                     </select>
+                    <div class="field-error" id="idTypeError"></div>
                 </div>
                 <div class="col-md-6">
                     <label>ID Number *</label>
-                    <input type="text" class="form-control input-light" name="idNumber" autocomplete="off" minlength="1" maxlength="20" required
-                           value="<%= session.getAttribute("idNumber") != null ? session.getAttribute("idNumber") : "" %>">
+                    <input type="text" class="form-control input-light" name="idNumber" autocomplete="off" minlength="1" maxlength="20" required>
+                    <div class="field-error" id="idNumberError"></div>
                 </div>
             </div>
 
@@ -239,31 +248,6 @@
             <div class="text-center mb-3">
                 <button type="submit" class="btn btn-primary px-5">Submit Application</button>
             </div>
-
-            <%-- Response Modal --%>
-            <%
-                String responseMessage = (String) session.getAttribute("responseMessage");
-                boolean showModal = responseMessage != null && !responseMessage.trim().isEmpty();
-            %>
-            <% if (showModal) { %>
-                <div class="modal fade show" id="responseModal" tabindex="-1" aria-modal="true" role="dialog" style="display: block;">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content text-center">
-                            <div class="modal-header bg-primary text-white">
-                                <h5 class="modal-title w-100">Response Status</h5>
-                                <button type="button" class="btn-close btn-close-white" onclick="hideModal()" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body"><p><%= responseMessage %></p></div>
-                            <div class="modal-footer justify-content-center">
-                                <button type="button" class="btn btn-primary" onclick="hideModal()">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-backdrop fade show"></div>
-                <% session.removeAttribute("responseMessage"); %>
-            <% } %>
-
         </form>
     </div>
 </div>
@@ -278,58 +262,146 @@
         mainContent.classList.toggle("shift");
     });
 
-    // Modal hide
-    function hideModal() {
-        const modal = document.getElementById('responseModal');
-        modal.style.display = 'none';
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) backdrop.style.display = 'none';
-    }
-
-    // Enable Other currency input using readonly
+    // Toggle "Other Currency" input
     function toggleOtherCurrency() {
         const otherCurrencyInput = document.getElementById("otherCurrencyInput");
-        const selectedCurrency = document.querySelector('input[name="currency"]:checked').value;
-
-        if (selectedCurrency === "OTH") {
-            otherCurrencyInput.readOnly = false;    // Editable
-            otherCurrencyInput.required = true;     // Required
+        const selected = document.querySelector('input[name="currency"]:checked');
+        if (selected && selected.value === "OTH") {
+            otherCurrencyInput.readOnly = false;
+            otherCurrencyInput.required = true;
+            otherCurrencyInput.focus();
         } else {
-            otherCurrencyInput.readOnly = true;     // Not editable
-            otherCurrencyInput.required = false;    // Not required
-            otherCurrencyInput.value = "";          // Clear value
+            otherCurrencyInput.readOnly = true;
+            otherCurrencyInput.required = false;
+            otherCurrencyInput.value = "";
         }
     }
 
-         // Call on page load to set initial state
-         window.onload = toggleOtherCurrency;
-    
-    function showValidationModal(message) {
-        const modalHtml = `
-            <div class="modal fade show" id="validationModal" tabindex="-1" style="display:block;">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content text-center">
-                        <div class="modal-header bg-danger text-white">
-                            <h5 class="modal-title w-100">Validation Error</h5>
-                            <button type="button" class="btn-close btn-close-white" onclick="closeValidationModal()"></button>
-                        </div>
-                        <div class="modal-body"><p>${message}</p></div>
-                        <div class="modal-footer justify-content-center">
-                            <button class="btn btn-danger" onclick="closeValidationModal()">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-backdrop fade show"></div>
-        `;
-        document.body.insertAdjacentHTML("beforeend", modalHtml);
+    // Sequential inline validation
+    const form = document.querySelector("form");
+    form.addEventListener("submit", function(e) {
+        document.querySelectorAll(".field-error").forEach(el => el.textContent = "");
+
+        function showError(field, errorId, message) {
+            document.getElementById(errorId).textContent = message;
+            if (field) field.focus();
+            e.preventDefault();
+        }
+
+        const fields = [
+            { selector: "[name='Name']", errorId: "nameError", message: "Please enter full name" },
+            { selector: "[name='dob']", errorId: "dobError", message: "Please select date of birth" },
+            { selector: "[name='Mobnbr']", errorId: "phoneError", message: "Please enter phone number" },
+            { selector: "[name='email']", errorId: "emailError", message: "Please enter email" },
+            { selector: "input[name='gender']:checked", errorId: "genderError", message: "Please select gender" },
+            { selector: "[name='address1']", errorId: "address1Error", message: "Please enter address" },
+            { selector: "[name='pincode']", errorId: "pincodeError", message: "Please enter pincode" },
+            { selector: "[name='city']", errorId: "cityError", message: "Please enter city" },
+            { selector: "[name='state']", errorId: "stateError", message: "Please enter state" },
+            { selector: "[name='country']", errorId: "countryError", message: "Please enter country" },
+            { selector: "input[name='accType']:checked", errorId: "accTypeError", message: "Please select account type" },
+            { selector: "input[name='currency']:checked", errorId: "currencyError", message: "Please select currency" },
+            { selector: "[name='otherCurrency']", errorId: "otherCurrencyError", message: "Please enter currency code", condition: () => {
+                const c = document.querySelector("input[name='currency']:checked");
+                return c && c.value === "OTH" && document.querySelector("[name='otherCurrency']").value.trim() === "";
+            }},
+            { selector: "[name='idType']", errorId: "idTypeError", message: "Please select ID type" },
+            { selector: "[name='idNumber']", errorId: "idNumberError", message: "Please enter ID number" }
+        ];
+
+        for (let f of fields) {
+            let el = document.querySelector(f.selector);
+            let invalid = f.condition ? f.condition() : !el || el.value.trim() === "";
+            if (invalid) {
+                showError(el, f.errorId, f.message);
+                return; // stop at first error
+            }
+        }
+    });
+
+    // Clear error and move focus to next field
+    const clearAndFocusNext = (currentSelector, nextSelector, errorId) => {
+        const current = document.querySelector(currentSelector);
+        const next = document.querySelector(nextSelector);
+        current.addEventListener("change", () => {
+            document.getElementById(errorId).textContent = "";
+            if(next) next.focus();
+        });
     }
 
-    function closeValidationModal() {
-        document.getElementById("validationModal").remove();
-        document.querySelector(".modal-backdrop").remove();
+    // Enhanced DOB → Phone inline validation
+    const dobField = document.querySelector("[name='dob']");
+    const phoneField = document.querySelector("[name='Mobnbr']");
+    const phoneError = document.getElementById("phoneError");
+
+    dobField.addEventListener("change", () => {
+        document.getElementById("dobError").textContent = "";
+        phoneField.focus();
+        if (phoneField.value.trim() === "") {
+            phoneError.textContent = "Please enter phone number";
+        } else {
+            phoneError.textContent = "";
+        }
+    });
+
+    phoneField.addEventListener("input", () => {
+        if (phoneField.value.trim() !== "") phoneError.textContent = "";
+    });
+
+    // Clear ID Type → ID Number inline validation
+    const idTypeField = document.querySelector("[name='idType']");
+    const idNumberField = document.querySelector("[name='idNumber']");
+    const idNumberError = document.getElementById("idNumberError");
+
+    idTypeField.addEventListener("change", () => {
+        document.getElementById("idTypeError").textContent = "";
+        idNumberField.focus();
+        if (idNumberField.value.trim() === "") {
+            idNumberError.textContent = "Please enter ID number";
+        } else {
+            idNumberError.textContent = "";
+        }
+    });
+
+    idNumberField.addEventListener("input", () => {
+        if (idNumberField.value.trim() !== "") idNumberError.textContent = "";
+    });
+
+    // Hide modal function
+    function hideModal() {
+        const modal = document.getElementById("responseModal");
+        if (modal) {
+            modal.classList.remove("show");
+            modal.style.display = "none";
+            const backdrop = document.querySelector(".modal-backdrop");
+            if (backdrop) backdrop.remove();
+        }
     }
 </script>
+
+<%-- Response Modal --%>
+<%
+    String responseMessage = (String) session.getAttribute("responseMessage");
+    boolean showModal = responseMessage != null && !responseMessage.trim().isEmpty();
+%>
+<% if (showModal) { %>
+    <div class="modal fade show" id="responseModal" tabindex="-1" aria-modal="true" role="dialog" style="display: block;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title w-100">Response Status</h5>
+                    <button type="button" class="btn-close btn-close-white" onclick="hideModal()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body"><p><%= responseMessage %></p></div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary" onclick="hideModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+    <% session.removeAttribute("responseMessage"); %>
+<% } %>
 
 </body>
 </html>
