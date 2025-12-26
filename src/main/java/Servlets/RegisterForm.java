@@ -9,12 +9,12 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -27,105 +27,119 @@ import utils.XMLWriter;
 @WebServlet("/RegisterForm")
 public class RegisterForm extends HttpServlet {
 
-    @SuppressWarnings({"CallToPrintStackTrace", "override"})
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         try {
-            // Build XML from form data
+            /* -------------------------------------------------
+             * 1. BUILD XML DOCUMENT
+             * ------------------------------------------------- */
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.newDocument();
 
-            Element regDataElement = doc.createElement("registrationData");
-            doc.appendChild(regDataElement);
+            Element root = doc.createElement("registrationData");
+            doc.appendChild(root);
 
-            // Populate XML fields
-            String[] fields = { "pgmname", "Name", "dob", "email", "gender", "address1", "address2", "address3",
-                                "pincode", "city", "state", "country", "accType", "idType", "idNumber", "currency" };
+            // Simple fields
+            String[] fields = {
+                "pgmname", "Name", "dob", "email", "gender",
+                "address1", "address2", "address3",
+                "pincode", "city", "state", "country",
+                "accType", "idType", "idNumber"
+            };
 
-            for (String field : fields) {
-                String value = request.getParameter(field);
-                if (value != null) {
-                    Element element = doc.createElement(field);
-                    element.appendChild(doc.createTextNode(value));
-                    regDataElement.appendChild(element);
+            for (String f : fields) {
+                String val = request.getParameter(f);
+                if (val != null && !val.isEmpty()) {
+                    Element e = doc.createElement(f);
+                    e.appendChild(doc.createTextNode(val));
+                    root.appendChild(e);
                 }
             }
 
-            // Handle phone number
+            /* Phone number */
             String mob = request.getParameter("Mobnbr");
-            String countryCode = request.getParameter("countryCode");
-            if (mob != null && countryCode != null) {
-                Element phoneElement = doc.createElement("Mobnbr");
-                phoneElement.appendChild(doc.createTextNode(countryCode + "-" + mob));
-                regDataElement.appendChild(phoneElement);
+            String cc = request.getParameter("countryCode");
+            if (mob != null && cc != null) {
+                Element phone = doc.createElement("Mobnbr");
+                phone.appendChild(doc.createTextNode(cc + "-" + mob));
+                root.appendChild(phone);
             }
 
-            // Handle currency special case
+            /* Currency */
             String currency = request.getParameter("currency");
             if (currency != null) {
-                Element curr = doc.createElement("currency");
+                Element cur = doc.createElement("currency");
                 if ("OTH".equals(currency)) {
-                    String actualCurrency = request.getParameter("otherCurrency");
-                    curr.appendChild(doc.createTextNode(actualCurrency != null ? actualCurrency : ""));
+                    String oth = request.getParameter("otherCurrency");
+                    cur.appendChild(doc.createTextNode(oth != null ? oth : ""));
                 } else {
-                    curr.appendChild(doc.createTextNode(currency));
+                    cur.appendChild(doc.createTextNode(currency));
                 }
-                regDataElement.appendChild(curr);
+                root.appendChild(cur);
             }
 
-            // Convert XML to String
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
+            /* -------------------------------------------------
+             * 2. TRANSFORM XML TO STRING
+             * ------------------------------------------------- */
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.ENCODING, "Cp037");
 
-            StringWriter writer = new StringWriter();
-            transformer.transform(new DOMSource(doc), new StreamResult(writer));
-            String xml = writer.toString();
+            StringWriter sw = new StringWriter();
+            transformer.transform(new DOMSource(doc), new StreamResult(sw));
+            String xmlData = sw.toString();
 
-            // Write XML to IFS with sequential filename
-            String xmlPath = XMLWriter.writeOrderToIFS(xml);
+            /* -------------------------------------------------
+             * 3. WRITE INPUT XML (THREAD SAFE)
+             * ------------------------------------------------- */
+            String inputXmlPath = XMLWriter.writeOrderToIFS(xmlData);
+            // Example:
+            // /home/NIKESHM/bankInp_1.xml
+            // /home/NIKESHM/bankInp_2.xml
 
-            // Call RPG program
-            XMLWriter.callRPGProgram(xmlPath);
+            /* -------------------------------------------------
+             * 4. CALL RPG PROGRAM
+             * ------------------------------------------------- */
+            XMLWriter.callRPGProgram(inputXmlPath);
 
-            // Construct output XML path (replace "bankInp_" with "bankOUT_")
-            String outXmlPath = xmlPath.replace("bankInp_", "bankOUT_");
+            /* -------------------------------------------------
+             * 5. READ OUTPUT XML
+             * ------------------------------------------------- */
+            String outputXmlPath = inputXmlPath.replace("bankInp_", "bankOUT_");
+            Map<String, String> result = XMLWriter.readResponseFromIFS(inputXmlPath);
 
-            // Read response from RPG output XML
-            Map<String, String> resultMsg = XMLWriter.readResponseFromIFS(outXmlPath);
+            /* -------------------------------------------------
+             * 6. SESSION HANDLING
+             * ------------------------------------------------- */
+            request.getSession().setAttribute("responseMessage", result.get("responseMessage"));
+            request.getSession().setAttribute("responseCode", result.get("responseCode"));
 
-            // SESSION HANDLING
-            request.getSession().setAttribute("responseMessage", resultMsg.get("responseMessage"));
-            request.getSession().setAttribute("responseCode", resultMsg.get("responseCode"));
-
-            if ("1".equals(resultMsg.get("responseCode"))) {
-                // Save submitted form data to session
-                for (String field : new String[]{ "Name", "dob", "countryCode", "Mobnbr", "email", "gender",
-                        "address1", "address2", "address3", "pincode", "city", "state", "country",
-                        "accType", "currency", "otherCurrency", "idType", "idNumber"}) {
-                    request.getSession().setAttribute(field, request.getParameter(field));
+            if ("1".equals(result.get("responseCode"))) {
+                for (String f : fields) {
+                    request.getSession().setAttribute(f, request.getParameter(f));
                 }
+                request.getSession().setAttribute("Mobnbr", mob);
+                request.getSession().setAttribute("countryCode", cc);
+                request.getSession().setAttribute("currency", currency);
+                request.getSession().setAttribute("otherCurrency",
+                        request.getParameter("otherCurrency"));
             } else {
-                // Clear session data on error
-                for (String field : new String[]{ "Name", "dob", "countryCode", "Mobnbr", "email", "gender",
-                        "address1", "address2", "address3", "pincode", "city", "state", "country",
-                        "accType", "currency", "otherCurrency", "idType", "idNumber"}) {
-                    request.getSession().removeAttribute(field);
-                }
+                request.getSession().invalidate();
             }
 
-        } catch (ParserConfigurationException | TransformerException e) {
-            e.printStackTrace();
-            request.getSession().setAttribute("responseMessage", "✖ Error: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute("responseMessage", "✖ Unexpected Error: " + e.getMessage());
+            request.getSession().setAttribute(
+                    "responseMessage",
+                    "✖ System Error: " + e.getMessage());
         }
 
-        // Redirect to page specified in form
+        /* -------------------------------------------------
+         * 7. REDIRECT
+         * ------------------------------------------------- */
         response.sendRedirect(request.getParameter("redirectPage"));
     }
 }
