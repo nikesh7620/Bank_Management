@@ -86,14 +86,20 @@
 </head>
 
 <body>
-<%-- Clear session fields on load --%>
+<%-- Clear session fields only if Add New Client clicked AND no AS400 error --%>
 <%
-    String[] fieldsToClear = {
-        "Name","dob","countryCode","Mobnbr","email","gender","address1","address2","address3",
-        "pincode","city","state","country","accType","currency","otherCurrency","idType","idNumber"
-    };
-    for (String field : fieldsToClear) {
-        session.removeAttribute(field);
+    Boolean isNewClient = "true".equals(request.getParameter("newClient"));
+    String responseCode = (String) session.getAttribute("responseCode");
+
+    if (isNewClient && (responseCode == null || !"1".equals(responseCode))) {
+        String[] fieldsToClear = {
+            "Name","dob","countryCode","Mobnbr","email","gender","address1","address2","address3",
+            "pincode","city","state","country","accType","currency","otherCurrency","idType","idNumber"
+        };
+        for (String field : fieldsToClear) {
+            session.removeAttribute(field);
+        }
+        session.removeAttribute("responseCode");
     }
 %>
 
