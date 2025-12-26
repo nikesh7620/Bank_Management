@@ -9,10 +9,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -32,9 +30,7 @@ public class RegisterForm extends HttpServlet {
             throws ServletException, IOException {
 
         try {
-            /* -------------------------------------------------
-             * 1. BUILD XML DOCUMENT
-             * ------------------------------------------------- */
+            // 1. BUILD XML DOCUMENT
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.newDocument();
@@ -42,7 +38,6 @@ public class RegisterForm extends HttpServlet {
             Element root = doc.createElement("registrationData");
             doc.appendChild(root);
 
-            // Simple fields
             String[] fields = {
                 "pgmname", "Name", "dob", "email", "gender",
                 "address1", "address2", "address3",
@@ -59,7 +54,7 @@ public class RegisterForm extends HttpServlet {
                 }
             }
 
-            /* Phone number */
+            // Phone
             String mob = request.getParameter("Mobnbr");
             String cc = request.getParameter("countryCode");
             if (mob != null && cc != null) {
@@ -68,7 +63,7 @@ public class RegisterForm extends HttpServlet {
                 root.appendChild(phone);
             }
 
-            /* Currency */
+            // Currency
             String currency = request.getParameter("currency");
             if (currency != null) {
                 Element cur = doc.createElement("currency");
@@ -81,9 +76,7 @@ public class RegisterForm extends HttpServlet {
                 root.appendChild(cur);
             }
 
-            /* -------------------------------------------------
-             * 2. TRANSFORM XML TO STRING
-             * ------------------------------------------------- */
+            // 2. TRANSFORM XML TO STRING
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.ENCODING, "Cp037");
@@ -92,28 +85,17 @@ public class RegisterForm extends HttpServlet {
             transformer.transform(new DOMSource(doc), new StreamResult(sw));
             String xmlData = sw.toString();
 
-            /* -------------------------------------------------
-             * 3. WRITE INPUT XML (THREAD SAFE)
-             * ------------------------------------------------- */
+            // 3. WRITE INPUT XML (THREAD SAFE)
             String inputXmlPath = XMLWriter.writeOrderToIFS(xmlData);
-            // Example:
-            // /home/NIKESHM/bankInp_1.xml
-            // /home/NIKESHM/bankInp_2.xml
 
-            /* -------------------------------------------------
-             * 4. CALL RPG PROGRAM
-             * ------------------------------------------------- */
+            // 4. CALL RPG PROGRAM
             XMLWriter.callRPGProgram(inputXmlPath);
 
-            /* -------------------------------------------------
-             * 5. READ OUTPUT XML
-             * ------------------------------------------------- */
+            // 5. READ OUTPUT XML
             String outputXmlPath = inputXmlPath.replace("bankInp_", "bankOUT_");
-            Map<String, String> result = XMLWriter.readResponseFromIFS(inputXmlPath);
+            Map<String, String> result = XMLWriter.readResponseFromIFS(outputXmlPath);
 
-            /* -------------------------------------------------
-             * 6. SESSION HANDLING
-             * ------------------------------------------------- */
+            // 6. SESSION HANDLING
             request.getSession().setAttribute("responseMessage", result.get("responseMessage"));
             request.getSession().setAttribute("responseCode", result.get("responseCode"));
 
@@ -124,22 +106,17 @@ public class RegisterForm extends HttpServlet {
                 request.getSession().setAttribute("Mobnbr", mob);
                 request.getSession().setAttribute("countryCode", cc);
                 request.getSession().setAttribute("currency", currency);
-                request.getSession().setAttribute("otherCurrency",
-                        request.getParameter("otherCurrency"));
+                request.getSession().setAttribute("otherCurrency", request.getParameter("otherCurrency"));
             } else {
                 request.getSession().invalidate();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute(
-                    "responseMessage",
-                    "✖ System Error: " + e.getMessage());
+            request.getSession().setAttribute("responseMessage", "✖ System Error: " + e.getMessage());
         }
 
-        /* -------------------------------------------------
-         * 7. REDIRECT
-         * ------------------------------------------------- */
+        // 7. REDIRECT
         response.sendRedirect(request.getParameter("redirectPage"));
     }
 }
