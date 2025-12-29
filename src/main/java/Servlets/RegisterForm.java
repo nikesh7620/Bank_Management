@@ -31,7 +31,6 @@ public class RegisterForm extends HttpServlet {
             throws ServletException, IOException {
 
         try {
-
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.newDocument();
@@ -39,9 +38,7 @@ public class RegisterForm extends HttpServlet {
             Element regDataElement = doc.createElement("registrationData");
             doc.appendChild(regDataElement);
 
-            // START IF BLOCK
             if (request.getParameter("pgmname") != null) {
-
                 Element pgmElement = doc.createElement("pgmname");
                 pgmElement.appendChild(doc.createTextNode(request.getParameter("pgmname")));
                 regDataElement.appendChild(pgmElement);
@@ -59,9 +56,7 @@ public class RegisterForm extends HttpServlet {
                     regDataElement.appendChild(dobElement);
                 }
 
-                if (request.getParameter("Mobnbr") != null &&
-                        request.getParameter("countryCode") != null) {
-
+                if (request.getParameter("Mobnbr") != null && request.getParameter("countryCode") != null) {
                     String countryCode = request.getParameter("countryCode");
                     String phone = request.getParameter("Mobnbr");
                     String fullPhone = countryCode + "-" + phone;
@@ -136,14 +131,12 @@ public class RegisterForm extends HttpServlet {
                 String currency = request.getParameter("currency");
                 if (currency != null) {
                     Element curr = doc.createElement("currency");
-
                     if ("OTH".equals(currency)) {
                         String actualCurrency = request.getParameter("otherCurrency");
                         curr.appendChild(doc.createTextNode(actualCurrency != null ? actualCurrency : ""));
                     } else {
                         curr.appendChild(doc.createTextNode(currency));
                     }
-
                     regDataElement.appendChild(curr);
                 }
 
@@ -164,28 +157,24 @@ public class RegisterForm extends HttpServlet {
             // TRANSFORM XML
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
-
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.ENCODING, "Cp037");
 
             StringWriter writer = new StringWriter();
             transformer.transform(new DOMSource(doc), new StreamResult(writer));
-
             String xml = writer.toString();
 
-            // WRITE TO IFS, CALL RPG
-            XMLWriter.writeOrderToIFS(xml);
+            // MULTI-USER XML handling
+            String inputFilePath = XMLWriter.writeOrderToIFS(xml);
             XMLWriter.callRPGProgram();
-
             Map resultMsg = XMLWriter.readResponseFromIFS();
 
-            // STORE RESPONSE MESSAGE ALWAYS
+            // STORE RESPONSE MESSAGE AND SESSION ATTRIBUTES
             request.getSession().setAttribute("responseMessage", resultMsg.get("responseMessage"));
             request.getSession().setAttribute("responseCode", resultMsg.get("responseCode"));
 
-            // SESSION HANDLING BASED ON RESPONSE CODE
             if ("1".equals(resultMsg.get("responseCode"))) {
-
+                // FULL SESSION HANDLING (exactly as original)
                 request.getSession().setAttribute("Name", request.getParameter("Name"));
                 request.getSession().setAttribute("dob", request.getParameter("dob"));
                 request.getSession().setAttribute("countryCode", request.getParameter("countryCode"));
@@ -207,9 +196,8 @@ public class RegisterForm extends HttpServlet {
 
                 request.getSession().setAttribute("idType", request.getParameter("idType"));
                 request.getSession().setAttribute("idNumber", request.getParameter("idNumber"));
-
             } else {
-
+                // Remove all attributes exactly as original
                 request.getSession().removeAttribute("Name");
                 request.getSession().removeAttribute("dob");
                 request.getSession().removeAttribute("countryCode");
@@ -234,12 +222,9 @@ public class RegisterForm extends HttpServlet {
             }
 
         } catch (ParserConfigurationException | TransformerException e) {
-
             e.printStackTrace();
             request.getSession().setAttribute("responseMessage", "✖ Error: " + e.getMessage());
-
         } catch (Exception e) {
-
             e.printStackTrace();
             request.getSession().setAttribute("responseMessage", "✖ Unexpected Error: " + e.getMessage());
         }
