@@ -26,12 +26,12 @@ import utils.XMLWriter;
 @WebServlet("/RegisterForm")
 public class RegisterForm extends HttpServlet {
 
-    @SuppressWarnings("override")
+    @SuppressWarnings({"CallToPrintStackTrace", "override"})
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         try {
-            // Build XML
+            // 1️⃣ Build XML
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.newDocument();
@@ -39,82 +39,57 @@ public class RegisterForm extends HttpServlet {
             Element regDataElement = doc.createElement("registrationData");
             doc.appendChild(regDataElement);
 
-            if (request.getParameter("pgmname") != null) {
-                Element pgmElement = doc.createElement("pgmname");
-                pgmElement.appendChild(doc.createTextNode(request.getParameter("pgmname")));
-                regDataElement.appendChild(pgmElement);
+            String[] fields = {"pgmname","Name","dob","Mobnbr","email","gender",
+                    "address1","address2","address3","pincode","city","state","country",
+                    "accType","currency","idType","idNumber"};
 
-                // Add fields dynamically
-                appendElementIfNotNull(doc, regDataElement, "Name", request.getParameter("Name"));
-                appendElementIfNotNull(doc, regDataElement, "dob", request.getParameter("dob"));
-
-                String mob = request.getParameter("Mobnbr");
-                String countryCode = request.getParameter("countryCode");
-                if (mob != null && countryCode != null) {
-                    appendElementIfNotNull(doc, regDataElement, "Mobnbr", countryCode + "-" + mob);
-                }
-
-                appendElementIfNotNull(doc, regDataElement, "email", request.getParameter("email"));
-                appendElementIfNotNull(doc, regDataElement, "gender", request.getParameter("gender"));
-
-                // Address
-                appendElementIfNotNull(doc, regDataElement, "address1", request.getParameter("address1"));
-                appendElementIfNotNull(doc, regDataElement, "address2", request.getParameter("address2"));
-                appendElementIfNotNull(doc, regDataElement, "address3", request.getParameter("address3"));
-                appendElementIfNotNull(doc, regDataElement, "pincode", request.getParameter("pincode"));
-                appendElementIfNotNull(doc, regDataElement, "city", request.getParameter("city"));
-                appendElementIfNotNull(doc, regDataElement, "state", request.getParameter("state"));
-                appendElementIfNotNull(doc, regDataElement, "country", request.getParameter("country"));
-
-                // Account
-                appendElementIfNotNull(doc, regDataElement, "accType", request.getParameter("accType"));
-
-                String currency = request.getParameter("currency");
-                if (currency != null) {
-                    if ("OTH".equals(currency)) {
-                        appendElementIfNotNull(doc, regDataElement, "currency", request.getParameter("otherCurrency"));
-                    } else {
-                        appendElementIfNotNull(doc, regDataElement, "currency", currency);
+            for (String field : fields) {
+                String value = request.getParameter(field);
+                if (value != null) {
+                    if ("currency".equals(field) && "OTH".equals(value)) {
+                        value = request.getParameter("otherCurrency");
                     }
+                    if ("Mobnbr".equals(field) && request.getParameter("countryCode") != null) {
+                        value = request.getParameter("countryCode") + "-" + value;
+                    }
+                    Element element = doc.createElement(field);
+                    element.appendChild(doc.createTextNode(value));
+                    regDataElement.appendChild(element);
                 }
-
-                // ID
-                appendElementIfNotNull(doc, regDataElement, "idType", request.getParameter("idType"));
-                appendElementIfNotNull(doc, regDataElement, "idNumber", request.getParameter("idNumber"));
             }
 
-            // Transform XML
+            // 2️⃣ Transform to XML string
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.ENCODING, "Cp037"); // AS400 EBCDIC
+            transformer.setOutputProperty(OutputKeys.ENCODING, "Cp037");
 
             StringWriter writer = new StringWriter();
             transformer.transform(new DOMSource(doc), new StreamResult(writer));
-            String xml = writer.toString();
+            String xmlString = writer.toString();
 
-            // Write XML to IFS
-            String inputFilePath = XMLWriter.writeOrderToIFS(xml);
+            // 3️⃣ Write XML to AS400 IFS (dynamic file)
+            String xmlFilePath = XMLWriter.writeOrderToIFS(xmlString);
 
-            // Call RPG program
-            XMLWriter.callRPGProgram();
+            // Determine bankInpX.xml index
+            int fileIndex = Integer.parseInt(xmlFilePath.replaceAll("\\D+", ""));
 
-            // Read response
-            Map<String, String> resultMsg = XMLWriter.readResponseFromIFS(inputFilePath);
+            // 4️⃣ Call RPG program
+            XMLWriter.callRPGProgram("/QSYS.LIB/NIKESHM1.LIB/BANKTST.PGM");
 
-            // Session handling
+            // 5️⃣ Read corresponding bankOutX.xml
+            String outputFileName = "bankOut" + fileIndex + ".xml";
+            Map<String, String> resultMsg = XMLWriter.readResponseFromIFS(outputFileName);
+
             request.getSession().setAttribute("responseMessage", resultMsg.get("responseMessage"));
             request.getSession().setAttribute("responseCode", resultMsg.get("responseCode"));
 
+            // 6️⃣ Manage session attributes
             if ("1".equals(resultMsg.get("responseCode"))) {
-                String[] fields = {"Name","dob","countryCode","Mobnbr","email","gender","address1","address2","address3",
-                        "pincode","city","state","country","accType","currency","otherCurrency","idType","idNumber"};
                 for (String field : fields) {
                     request.getSession().setAttribute(field, request.getParameter(field));
                 }
             } else {
-                String[] fields = {"Name","dob","countryCode","Mobnbr","email","gender","address1","address2","address3",
-                        "pincode","city","state","country","accType","currency","otherCurrency","idType","idNumber"};
                 for (String field : fields) {
                     request.getSession().removeAttribute(field);
                 }
@@ -129,13 +104,5 @@ public class RegisterForm extends HttpServlet {
         }
 
         response.sendRedirect(request.getParameter("redirectPage"));
-    }
-
-    private void appendElementIfNotNull(Document doc, Element parent, String tag, String value) {
-        if (value != null && !value.trim().isEmpty()) {
-            Element e = doc.createElement(tag);
-            e.appendChild(doc.createTextNode(value.trim()));
-            parent.appendChild(e);
-        }
     }
 }
