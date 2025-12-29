@@ -10,7 +10,7 @@ public class XMLWriter {
 
     private static int fileCounter = 0;
 
-    // Synchronized method to ensure unique file numbers for multiple users
+    // Ensure unique file numbers in multi-threaded scenario
     private static synchronized int getNextFileNumber() {
         fileCounter++;
         return fileCounter;
@@ -18,28 +18,40 @@ public class XMLWriter {
 
     public static String writeOrderToIFS(String xml) throws IOException {
         int fileNum = getNextFileNumber();
-        String inputFilePath = "/home/NIKESHM/bankInp" + fileNum + ".xml";
+        String dirPath = "/home/NIKESHM/";
+        File dir = new File(dirPath);
+        if (!dir.exists()) {
+            boolean created = dir.mkdirs();
+            if (!created) {
+                throw new IOException("Failed to create directory: " + dirPath);
+            }
+        }
 
-        try (FileWriter writer = new FileWriter(new File(inputFilePath))) {
+        String inputFilePath = dirPath + "bankInp" + fileNum + ".xml";
+        File xmlFile = new File(inputFilePath);
+
+        try (FileWriter writer = new FileWriter(xmlFile)) {
             writer.write(xml);
+        }
+
+        // Ensure file was created
+        if (!xmlFile.exists() || xmlFile.length() == 0) {
+            throw new IOException("Failed to create/write XML file: " + inputFilePath);
         }
 
         return inputFilePath;
     }
 
     public static void callRPGProgram() {
-        // Placeholder for RPG program call
-        // The RPG program will process the input XML file
+        // Placeholder: actual RPG call logic goes here
     }
 
-    public static Map<String, String> readResponseFromIFS() throws IOException {
+    public static Map<String, String> readResponseFromIFS(String inputFilePath) {
         Map<String, String> response = new HashMap<>();
-        int fileNum = fileCounter; // Latest file number
+        // Replace "bankInp" with "bankOut" to simulate response file
+        String outputFilePath = inputFilePath.replace("bankInp", "bankOut");
 
-        String outputFilePath = "/home/NIKESHM/bankOut" + fileNum + ".xml";
-
-        // Dummy response reading logic
-        // In real code, read the XML from outputFilePath and parse response
+        // Dummy response for now
         response.put("responseMessage", "✓ Success");
         response.put("responseCode", "1");
 
