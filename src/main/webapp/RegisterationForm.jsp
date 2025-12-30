@@ -79,6 +79,12 @@
             font-size: 12px;
             margin-top: 3px;
         }
+        /* REQUIRED FIELD STAR */
+        .required-star {
+            color: #dc3545; /* Bootstrap danger red */
+            font-weight: bold;
+        }
+
         #otherCurrencyInput[readonly] {
             background-color: #e9ecef;
         }
@@ -125,12 +131,12 @@
             <!-- Name & DOB -->
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label>Full Name *</label>
+                    <label>Full Name <span class="required-star">*</span></label>
                     <input type="text" class="form-control input-light" name="Name" autocomplete="off" minlength="1" maxlength="30" required>
                     <div class="field-error" id="nameError"></div>
                 </div>
                 <div class="col-md-6">
-                    <label>Date of Birth *</label>
+                    <label>Date of Birth <span class="required-star">*</span></label>
                     <input type="date" class="form-control input-light" name="dob" autocomplete="off" required>
                     <div class="field-error" id="dobError"></div>
                 </div>
@@ -139,7 +145,7 @@
             <!-- Phone & Email -->
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label>Phone Number *</label>
+                    <label>Phone Number <span class="required-star">*</span></label>
                     <div class="input-group">
                         <select class="form-select input-light" name="countryCode" style="max-width: 55px;" required>
                             <option value="+91">+91</option>
@@ -155,7 +161,7 @@
                     <div class="field-error" id="phoneError"></div>
                 </div>
                 <div class="col-md-6">
-                    <label>Email *</label>
+                    <label>Email <span class="required-star">*</span></label>
                     <input type="email" class="form-control input-light" name="email" autocomplete="off" minlength="5" maxlength="40" required>
                     <div class="field-error" id="emailError"></div>
                 </div>
@@ -163,7 +169,7 @@
 
             <!-- Gender -->
             <div class="mb-3">
-                <label>Gender *</label><br>
+                <label>Gender <span class="required-star">*</span></label><br>
                 <input type="radio" name="gender" value="M" required> Male
                 <input type="radio" name="gender" value="F" class="ms-3"> Female
                 <input type="radio" name="gender" value="T" class="ms-3"> Transgender
@@ -172,7 +178,7 @@
 
             <!-- Address -->
             <div class="mb-3">
-                <label>Address Line 1 *</label>
+                <label>Address Line 1 <span class="required-star">*</span></label>
                 <input type="text" class="form-control input-light" name="address1" autocomplete="off" minlength="1" maxlength="30" required>
                 <div class="field-error" id="address1Error"></div>
             </div>
@@ -186,12 +192,12 @@
                     <input type="text" class="form-control input-light" name="address3" autocomplete="off" minlength="0" maxlength="30">
                 </div>
                 <div class="col-md-4">
-                    <label>Pincode *</label>
+                    <label>Pincode <span class="required-star">*</span></label>
                     <input type="text" class="form-control input-light" name="pincode" autocomplete="off" minlength="6" maxlength="6" required>
                     <div class="field-error" id="pincodeError"></div>
                 </div>
                 <div class="col-md-4">
-                    <label>City *</label>
+                    <label>City <span class="required-star">*</span></label>
                     <input type="text" class="form-control input-light" name="city" autocomplete="off" minlength="1" maxlength="30" required>
                     <div class="field-error" id="cityError"></div>
                 </div>
@@ -200,12 +206,12 @@
             <!-- State & Country -->
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label>State *</label>
+                    <label>State <span class="required-star">*</span></label>
                     <input type="text" class="form-control input-light" name="state" autocomplete="off" minlength="1" maxlength="30" required>
                     <div class="field-error" id="stateError"></div>
                 </div>
                 <div class="col-md-6">
-                    <label>Country *</label>
+                    <label>Country <span class="required-star">*</span></label>
                     <input type="text" class="form-control input-light" name="country" autocomplete="off" minlength="1" maxlength="30" required>
                     <div class="field-error" id="countryError"></div>
                 </div>
@@ -214,13 +220,13 @@
             <!-- Account Type & Currency -->
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label>Preferred Account Type *</label><br>
+                    <label>Preferred Account Type <span class="required-star">*</span></label><br>
                     <input type="radio" name="accType" value="Savings" required> Savings
                     <input type="radio" name="accType" value="Current" class="ms-3"> Current    
                     <div class="field-error" id="accTypeError"></div>
                 </div>
                 <div class="col-md-6">
-                    <label>Preferred Currency *</label><br>
+                    <label>Preferred Currency <span class="required-star">*</span></label><br>
                     <input type="radio" name="currency" value="USD" onclick="toggleOtherCurrency()" required> USD
                     <input type="radio" name="currency" value="INR" class="ms-3" onclick="toggleOtherCurrency()"> INR
                     <input type="radio" name="currency" value="OTH" class="ms-3" onclick="toggleOtherCurrency()"> Other:
@@ -233,7 +239,7 @@
             <!-- ID Details -->
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label>ID Type *</label>
+                    <label>ID Type <span class="required-star">*</span></label>
                     <select class="form-control input-light" name="idType" required>
                         <option value="" disabled selected>Select ID Type</option>
                         <option value="Passport">Passport</option>
@@ -244,7 +250,7 @@
                     <div class="field-error" id="idTypeError"></div>
                 </div>
                 <div class="col-md-6">
-                    <label>ID Number *</label>
+                    <label>ID Number <span class="required-star">*</span></label>
                     <input type="text" class="form-control input-light" name="idNumber" autocomplete="off" minlength="1" maxlength="20" required>
                     <div class="field-error" id="idNumberError"></div>
                 </div>
