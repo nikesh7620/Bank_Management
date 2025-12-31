@@ -21,7 +21,6 @@ import com.ibm.as400.access.ProgramParameter;
 
 public class XMLWriter {
 
-    // Write XML string to IFS path
     public static void writeOrderToIFS(String xmlData, String xmlFilePath) throws Exception {
         AS400 system = new AS400("PUB400.COM", "NIKESHM", "zoro@404");
         IFSFile file = new IFSFile(system, xmlFilePath);
@@ -37,16 +36,12 @@ public class XMLWriter {
         }
     }
 
-    // Call RPG program for given XML file
     public static void callRPGProgram(String xmlFilePath, String responseFilePath) throws Exception {
         AS400 system = new AS400("PUB400.COM", "NIKESHM", "zoro@404");
         ProgramCall pgm = new ProgramCall(system);
 
-        // RPG program name
         String program = "/QSYS.LIB/NIKESHM1.LIB/BANKTST.PGM";
-
-        // Parameters: input file and output file
-        com.ibm.as400.access.ProgramParameter[] params = new com.ibm.as400.access.ProgramParameter[2];
+        ProgramParameter[] params = new ProgramParameter[2];
         params[0] = new ProgramParameter((xmlFilePath + "\0").getBytes("Cp037"));
         params[1] = new ProgramParameter((responseFilePath + "\0").getBytes("Cp037"));
 
@@ -62,7 +57,6 @@ public class XMLWriter {
         system.disconnectAllServices();
     }
 
-    // Read response XML from IFS
     public static Map<String, String> readResponseFromIFS(String responseFilePath) {
         Map<String, String> result = new HashMap<>();
         AS400 system = new AS400("PUB400.COM", "NIKESHM", "zoro@404");
@@ -76,17 +70,16 @@ public class XMLWriter {
             Document document = builder.parse(new org.xml.sax.InputSource(reader));
             document.getDocumentElement().normalize();
 
-            // Generic fields to read from response
             String[] fields = { "responseMessage", "responseCode", "pgmname", "Name", "dob", "Mobnbr", "email",
                     "gender", "address1", "address2", "address3", "pincode", "city", "state", "country", "accType",
-                    "currency", "idType", "idNumber" };
+                    "currency", "otherCurrency", "idType", "idNumber" };
 
             for (String field : fields) {
                 NodeList nodeList = document.getElementsByTagName(field);
                 if (nodeList.getLength() > 0) {
                     result.put(field, nodeList.item(0).getTextContent().trim());
                 } else {
-                    result.put(field, "⚠️ " + field + " Not Found");
+                    result.put(field, "");
                 }
             }
 

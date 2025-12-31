@@ -44,31 +44,54 @@ public class RegisterForm extends HttpServlet {
             doc.appendChild(regDataElement);
 
             if (request.getParameter("pgmname") != null) {
-                // program name
+
+                // pgmname
                 Element pgmElement = doc.createElement("pgmname");
                 pgmElement.appendChild(doc.createTextNode(request.getParameter("pgmname")));
                 regDataElement.appendChild(pgmElement);
 
-                // main fields
-                String[] fields = { "Name", "dob", "Mobnbr", "email", "gender", "address1", "address2",
-                        "address3", "pincode", "city", "state", "country", "accType", "currency", "otherCurrency",
-                        "idType", "idNumber", "countryCode" };
+                // Name
+                Element nameElem = doc.createElement("Name");
+                nameElem.appendChild(doc.createTextNode(request.getParameter("Name")));
+                regDataElement.appendChild(nameElem);
+
+                // dob
+                Element dobElem = doc.createElement("dob");
+                dobElem.appendChild(doc.createTextNode(request.getParameter("dob")));
+                regDataElement.appendChild(dobElem);
+
+                // Mobnbr (after dob)
+                String mob = request.getParameter("Mobnbr");
+                String cc = request.getParameter("countryCode");
+                Element mobElem = doc.createElement("Mobnbr");
+                if (mob != null && cc != null) {
+                    mobElem.appendChild(doc.createTextNode(cc + "-" + mob));
+                }
+                regDataElement.appendChild(mobElem);
+
+                // Remaining fields (order matters)
+                String[] fields = {
+                    "email", "gender", "address1", "address2", "address3",
+                    "pincode", "city", "state", "country",
+                    "accType", "currency", "idType", "idNumber"
+                };
 
                 for (String field : fields) {
+                    Element elem = doc.createElement(field);
                     String value = request.getParameter(field);
-                    if (value != null) {
-                        Element elem = doc.createElement(field);
-                        elem.appendChild(doc.createTextNode(value));
-                        regDataElement.appendChild(elem);
+                       
+                    // Special handling for currency
+                    if ("currency".equals(field)) {
+                        String otherCurrency = request.getParameter("otherCurrency");
+                        if (otherCurrency != null && !otherCurrency.trim().isEmpty()) {
+                            value = otherCurrency; // override currency with otherCurrency
+                        }
                     }
-                }
-
-                // Combine country code and mobile
-                if (request.getParameter("Mobnbr") != null && request.getParameter("countryCode") != null) {
-                    String fullPhone = request.getParameter("countryCode") + "-" + request.getParameter("Mobnbr");
-                    Element phoneElem = doc.createElement("Mobnbr");
-                    phoneElem.appendChild(doc.createTextNode(fullPhone));
-                    regDataElement.appendChild(phoneElem);
+                    
+                    if (value != null && !value.trim().isEmpty()) {
+                        elem.appendChild(doc.createTextNode(value));
+                    }
+                    regDataElement.appendChild(elem);
                 }
             }
 
@@ -76,7 +99,8 @@ public class RegisterForm extends HttpServlet {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.ENCODING, "Cp037");
+            transformer.setOutputProperty(OutputKeys.ENCODING, "EBCDIC-CP-US");
+            transformer.setOutputProperty(OutputKeys.STANDALONE, "no");
 
             StringWriter writer = new StringWriter();
             transformer.transform(new DOMSource(doc), new StreamResult(writer));
@@ -91,25 +115,39 @@ public class RegisterForm extends HttpServlet {
             XMLWriter.writeOrderToIFS(xmlString, xmlFileName);
             XMLWriter.callRPGProgram(xmlFileName, responseFileName);
 
-            // --- 4. Read response for this user ---
+            // --- 4. Read response ---
             Map<String, String> resultMsg = XMLWriter.readResponseFromIFS(responseFileName);
 
-            // --- 5. Store response in session ---
+            // --- 5. Store response ---
             session.setAttribute("responseMessage", resultMsg.get("responseMessage"));
             session.setAttribute("responseCode", resultMsg.get("responseCode"));
 
             // --- 6. Store or remove user fields based on response ---
             if ("1".equals(resultMsg.get("responseCode"))) {
-                String[] storeFields = { "Name", "dob", "countryCode", "Mobnbr", "email", "gender", "address1",
-                        "address2", "address3", "pincode", "city", "state", "country", "accType", "currency",
-                        "otherCurrency", "idType", "idNumber" };
+
+                String[] storeFields = {
+                    "Name", "dob", "countryCode", "Mobnbr", "email", "gender",
+                    "address1", "address2", "address3", "pincode", "city",
+                    "state", "country", "accType", "currency",
+                    "otherCurrency", "idType", "idNumber"
+                };
+
                 for (String field : storeFields) {
-                    session.setAttribute(field, request.getParameter(field));
+                    String value = request.getParameter(field);
+                    if (value == null || value.trim().isEmpty()) {
+                        value = resultMsg.getOrDefault(field, "");
+                    }
+                    session.setAttribute(field, value);
                 }
+
             } else {
-                String[] removeFields = { "Name", "dob", "countryCode", "Mobnbr", "email", "gender", "address1",
-                        "address2", "address3", "pincode", "city", "state", "country", "accType", "currency",
-                        "otherCurrency", "idType", "idNumber" };
+                String[] removeFields = {
+                    "Name", "dob", "countryCode", "Mobnbr", "email", "gender",
+                    "address1", "address2", "address3", "pincode", "city",
+                    "state", "country", "accType", "currency",
+                    "otherCurrency", "idType", "idNumber"
+                };
+
                 for (String field : removeFields) {
                     session.removeAttribute(field);
                 }
@@ -123,7 +161,7 @@ public class RegisterForm extends HttpServlet {
             session.setAttribute("responseMessage", "✖ Unexpected Error: " + e.getMessage());
         }
 
-        // Redirect back to the requested page
+        // Redirect back
         response.sendRedirect(request.getParameter("redirectPage"));
     }
 }
