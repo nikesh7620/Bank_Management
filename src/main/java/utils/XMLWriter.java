@@ -21,16 +21,16 @@ import com.ibm.as400.access.ProgramParameter;
 
 public class XMLWriter {
 
-    // --- Helper to get AS400 system from environment variables ---
+    // --- Helper to get AS400 system from JVM system properties (Render-safe) ---
     private static AS400 getAS400System() {
-        String host = System.getenv("AS400_HOST");
-        String user = System.getenv("AS400_USER");
-        String password = System.getenv("AS400_PASSWORD");
+        String host = System.getProperty("AS400_HOST");
+        String user = System.getProperty("AS400_USER");
+        String password = System.getProperty("AS400_PASSWORD");
 
         if (host == null || user == null || password == null) {
             throw new RuntimeException(
-                "AS400 environment variables not configured. " +
-                "Please set AS400_HOST, AS400_USER, AS400_PASSWORD"
+                "AS400 system properties not configured. " +
+                "Check JAVA_OPTS in Render."
             );
         }
 
