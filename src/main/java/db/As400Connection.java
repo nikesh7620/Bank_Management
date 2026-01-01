@@ -7,15 +7,15 @@ public class As400Connection {
 
     public static Connection getConnection() throws Exception {
 
-        String host = System.getenv("AS400_HOST");
-        String user = System.getenv("AS400_USER");
-        String password = System.getenv("AS400_PASSWORD");
+        // Read JVM system properties (Render-safe)
+        String host = System.getProperty("AS400_HOST");
+        String user = System.getProperty("AS400_USER");
+        String password = System.getProperty("AS400_PASSWORD");
 
-        // Fail fast if not configured
         if (host == null || user == null || password == null) {
             throw new RuntimeException(
-                "AS400 environment variables not configured. " +
-                "Please set AS400_HOST, AS400_USER, AS400_PASSWORD"
+                "AS400 system properties not configured. " +
+                "Check JAVA_OPTS in Render."
             );
         }
 
