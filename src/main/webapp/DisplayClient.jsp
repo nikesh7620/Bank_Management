@@ -64,7 +64,7 @@
     <h2 class="text-center text-secondary">Client Management System</h2>
     <h3 class="text-center text-secondary">Display Client Details</h3>
 
-    <form id="clientForm" action="<%=request.getContextPath()%>/getClientDetails" method="post">
+    <form id="clientForm" action="<%=request.getContextPath()%>/GetClientDetails" method="post">
         <input type="hidden" name="redirectPage" value="DisplayClient.jsp">
 
         <!-- Account Number & Full Name -->
