@@ -3,7 +3,7 @@
 <%
     // Security & session check
     if (session == null || session.getAttribute("user") == null) {
-        response.sendRedirect("login.jsp");
+        response.sendRedirect("Login.jsp");
         return;
     }
 
@@ -54,9 +54,9 @@
 
 <div class="sidebar" id="sidebar">
     <a href="BankDashBoard.jsp"><i class="fas fa-home"></i>Dashboard</a>
-    <a href="RegisterationForm.jsp"><i class="fas fa-user-plus"></i>Add New Client</a>
+    <a href="RegistrationForm.jsp"><i class="fas fa-user-plus"></i>Add New Client</a>
     <a href="DisplayClient.jsp"><i class="fas fa-users"></i>Display Client</a>
-    <a href="login.jsp"><i class="fas fa-sign-out-alt"></i>Logout</a>
+    <a href="Login.jsp"><i class="fas fa-sign-out-alt"></i>Logout</a>
 </div>
 
 <div class="content">

@@ -21,8 +21,24 @@ import com.ibm.as400.access.ProgramParameter;
 
 public class XMLWriter {
 
+    // --- Helper to get AS400 system from environment variables ---
+    private static AS400 getAS400System() {
+        String host = System.getenv("AS400_HOST");
+        String user = System.getenv("AS400_USER");
+        String password = System.getenv("AS400_PASSWORD");
+
+        if (host == null || user == null || password == null) {
+            throw new RuntimeException(
+                "AS400 environment variables not configured. " +
+                "Please set AS400_HOST, AS400_USER, AS400_PASSWORD"
+            );
+        }
+
+        return new AS400(host, user, password);
+    }
+
     public static void writeOrderToIFS(String xmlData, String xmlFilePath) throws Exception {
-        AS400 system = new AS400("PUB400.COM", "NIKESHM", "zoro@404");
+        AS400 system = getAS400System();
         IFSFile file = new IFSFile(system, xmlFilePath);
 
         try (Writer writer = new OutputStreamWriter(
@@ -37,7 +53,7 @@ public class XMLWriter {
     }
 
     public static void callRPGProgram(String xmlFilePath, String responseFilePath) throws Exception {
-        AS400 system = new AS400("PUB400.COM", "NIKESHM", "zoro@404");
+        AS400 system = getAS400System();
         ProgramCall pgm = new ProgramCall(system);
 
         String program = "/QSYS.LIB/NIKESHM1.LIB/BANKTST.PGM";
@@ -59,7 +75,7 @@ public class XMLWriter {
 
     public static Map<String, String> readResponseFromIFS(String responseFilePath) {
         Map<String, String> result = new HashMap<>();
-        AS400 system = new AS400("PUB400.COM", "NIKESHM", "zoro@404");
+        AS400 system = getAS400System();
 
         try {
             IFSFile file = new IFSFile(system, responseFilePath);

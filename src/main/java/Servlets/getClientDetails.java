@@ -1,14 +1,14 @@
 package Servlets;
 
-import db.AS400Connection;
+import db.As400Connection;
 import java.io.IOException;
 import java.sql.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 
-@WebServlet("/getClientDetails")
-public class getClientDetails extends HttpServlet {
+@WebServlet("/GetClientDetails")
+public class GetClientDetails extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
@@ -45,7 +45,7 @@ public class getClientDetails extends HttpServlet {
             return;
         }
 
-        try (Connection con = AS400Connection.getConnection();
+        try (Connection con = As400Connection.getConnection();
              PreparedStatement ps = con.prepareStatement(
                  "SELECT ACCNBR, ACCTYP, CNAME, GENDER, DOB, MOBNBR, EMAIL, " +
                  "ADDR1, ADDR2, ADDR3, CITY, STATE, COUNTRY, PINCDE, " +

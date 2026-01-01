@@ -63,7 +63,7 @@ if ("true".equals(request.getParameter("logout"))) {
 <div class="login-card">
     <h4 class="login-title">Saamsha Technologies</h4>
 
-    <form method="post" action="validateCredential">
+    <form method="post" action="ValidateCredentials">
 
         <div class="mb-3">
             <label class="form-label">User ID</label>

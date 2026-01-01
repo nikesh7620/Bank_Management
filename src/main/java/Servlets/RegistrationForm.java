@@ -25,8 +25,8 @@ import org.w3c.dom.Element;
 
 import utils.XMLWriter;
 
-@WebServlet("/RegisterForm")
-public class RegisterForm extends HttpServlet {
+@WebServlet("/RegistrationForm")
+public class RegistrationForm extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

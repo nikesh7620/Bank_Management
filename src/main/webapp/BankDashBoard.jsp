@@ -10,7 +10,7 @@
 
     // Check user session
     if (session == null || session.getAttribute("user") == null) {
-        response.sendRedirect(request.getContextPath() + "/login.jsp");
+        response.sendRedirect(request.getContextPath() + "/Login.jsp");
         return;
     }
 
@@ -127,7 +127,7 @@
         <i class="fa fa-home me-2"></i>Dashboard
     </a>
 
-    <a href="<%= request.getContextPath() %>/login.jsp">
+    <a href="<%= request.getContextPath() %>/Login.jsp">
         <i class="fa fa-sign-out-alt me-2"></i>Logout
     </a>
 </div>
@@ -138,7 +138,7 @@
     <h3 class="mb-4">Client Account Activities</h3>
     
     <div class="d-flex justify-content-end gap-2 mb-3">
-        <a href="<%= request.getContextPath() %>/RegisterationForm.jsp"
+        <a href="<%= request.getContextPath() %>/RegistrationForm.jsp"
            class="btn btn-outline-primary px-4">
             <i class="fa fa-user-plus me-2"></i>Add New Client
         </a>

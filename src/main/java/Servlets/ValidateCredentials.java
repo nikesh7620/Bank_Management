@@ -1,6 +1,6 @@
 package Servlets;
 
-import db.AS400Connection;
+import db.As400Connection;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -15,8 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-@WebServlet("/validateCredential")
-public class validateCredential extends HttpServlet {
+@WebServlet("/ValidateCredentials")
+public class ValidateCredentials extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -31,7 +31,7 @@ public class validateCredential extends HttpServlet {
         String custQuery =
             "SELECT accnbr, cname, acctyp, crtdt, status FROM NIKESHM1.CUSTMST";
 
-        try (Connection conn = AS400Connection.getConnection();
+        try (Connection conn = As400Connection.getConnection();
              PreparedStatement loginPs = conn.prepareStatement(loginQuery)) {
 
             loginPs.setString(1, userId);
@@ -78,14 +78,14 @@ public class validateCredential extends HttpServlet {
             } else {
                 request.getSession().setAttribute(
                         "loginError", "Invalid Credential");
-                response.sendRedirect("login.jsp");
+                response.sendRedirect("Login.jsp");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
             request.getSession().setAttribute(
                     "loginError", "Internal server error");
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("Login.jsp");
         }
     }
 }
