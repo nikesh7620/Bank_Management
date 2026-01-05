@@ -135,7 +135,7 @@
 <!-- Main Content -->
 <div class="main">
 
-    <h3 class="mb-4">Client Account Activities</h3>
+    <h3 class="mb-4">Client Account Activity</h3>
     
     <div class="d-flex justify-content-end gap-2 mb-3">
         <a href="<%= request.getContextPath() %>/RegistrationForm.jsp"
