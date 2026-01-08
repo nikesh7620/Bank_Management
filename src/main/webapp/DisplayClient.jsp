@@ -1,5 +1,4 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="true" %>
-
 <%
     // Security & session check
     if (session == null || session.getAttribute("user") == null) {
@@ -8,204 +7,213 @@
     }
 
     // Disable caching
-    response.addHeader("Pragma", "no-cache");
     response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-    response.addHeader("Cache-Control", "pre-check=0, post-check=0");
+    response.setHeader("Pragma", "no-cache");
     response.setDateHeader("Expires", 0);
 %>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Display Client Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Bootstrap & Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
-    <style>
-        body { background-color: #f8f9fa; font-family: Arial, sans-serif; margin:0; }
-        .sidebar { height: 100vh; width: 200px; background-color: #6c757d; position: fixed; top: 0; left: -200px; padding-top: 60px; transition: 0.3s; overflow-x: hidden; z-index: 999; }
-        .sidebar a { color: white; display: flex; align-items: center; padding: 10px 20px; text-decoration: none; font-size: 14px; margin: 5px 0; border-radius: 4px; }
-        .sidebar a i { margin-right: 10px; }
-        .sidebar a:hover { background-color: #5a6268; }
-        .sidebar.active { left: 0; }
-        .hamburger { position: fixed; top: 15px; left: 15px; font-size: 24px; color: #fff; background-color: #0d6efd; padding: 5px 10px; border-radius: 5px; cursor: pointer; z-index: 1001; }
-        .content { max-width: 900px; margin: 0 auto; padding: 20px; transition: 0.3s; }
-        .content.shift { margin-left: 200px; }
-        .form-label { font-weight:600; font-size:13px; }
-        input.form-control { font-size: 13px; padding:8px; width:100%; box-sizing:border-box; }
-        input.form-control:readonly { background-color:#eaf2fb; }
-        #clientError { color:#e53935; font-size:12px; margin-top:3px; }
-        .btn-primary { background-color: #1a73e8; border-color: #1a73e8; }
-        .btn-primary:hover { background-color: #155ab6; border-color: #155ab6; }
-        .btn-secondary { background-color: #6c757d; border-color: #6c757d; }
-        .btn-secondary:hover { background-color: #5a6268; border-color: #5a6268; }
-        .form-row { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
-        .form-row > div { flex: 1; }
-        .half-width { flex: 0 0 calc(50% - 7.5px); } /* Half width fields */
-        @media (max-width: 768px) { .form-row { flex-direction: column; } .half-width { flex: 1; } }
-    </style>
+    <link rel="stylesheet" href="RegistrationForm.css" />
 </head>
-
 <body>
 
+<!-- Hamburger -->
 <i class="fas fa-bars hamburger" id="hamburgerBtn"></i>
 
+<!-- Sidebar -->
 <div class="sidebar" id="sidebar">
-    <a href="BankDashBoard.jsp"><i class="fas fa-home"></i>Dashboard</a>
+    <a href="LoadDashboardData"><i class="fas fa-home"></i>Dashboard</a>
     <a href="RegistrationForm.jsp"><i class="fas fa-user-plus"></i>Add New Client</a>
     <a href="DisplayClient.jsp"><i class="fas fa-users"></i>Display Client</a>
     <a href="Login.jsp"><i class="fas fa-sign-out-alt"></i>Logout</a>
 </div>
 
-<div class="content">
-    <h1 class="text-center text-primary">Saamsha Technologies</h1>
-    <h2 class="text-center text-secondary">Client Management System</h2>
-    <h3 class="text-center text-secondary">Display Client Details</h3>
-
-    <form id="clientForm" action="<%=request.getContextPath()%>/GetClientDetails" method="post">
-        <input type="hidden" name="redirectPage" value="DisplayClient.jsp">
-
-        <!-- Account Number & Full Name -->
-        <div class="form-row">
-            <div class="half-width">
-                <label class="form-label">Account Number</label>
-                <input type="text" class="form-control" name="accountNumber" id="accountNumber" maxlength="6"
-                       pattern="[A-Za-z0-9]{1,6}"
-                       value="<%= session.getAttribute("accountNumber") != null ? session.getAttribute("accountNumber") : "" %>"
-                       oninput="this.value=this.value.toUpperCase()">
-                <div id="clientError"><%= session.getAttribute("clientError") != null ? session.getAttribute("clientError") : "" %></div>
-            </div>
-
-            <div class="half-width">
-                <label class="form-label">Full Name</label>
-                <input type="text" class="form-control" readonly maxlength="30"
-                       value="<%= session.getAttribute("fullName") != null ? session.getAttribute("fullName") : "" %>">
-            </div>
+<!-- Main Content -->
+<div class="content" id="mainContent">
+    <div class="form-container">
+        <div class="text-center mb-4">
+            <h1 style="font-size:32px; font-weight:600; margin-bottom:5px;">Saamsha Technologies</h1>
+            <h4 style="font-size:20px; font-weight:400; margin-bottom:10px;">Client Management System</h4>
+            <h5 style="font-size:18px; font-weight:500;">Display Client Details</h5>
         </div>
 
-        <!-- Gender & Date of Birth -->
-        <div class="form-row">
-            <div class="half-width">
-                <label class="form-label">Gender</label>
-                <input type="text" class="form-control" readonly maxlength="12"
-                       value="<%= "M".equals(session.getAttribute("gender")) ? "Male"
-                               : ("F".equals(session.getAttribute("gender")) ? "Female"
-                               : ("T".equals(session.getAttribute("gender")) ? "Transgender" : "")) %>">
-            </div>
+        <form id="clientForm" action="<%=request.getContextPath()%>/GetClientDetails" method="post">
+            <input type="hidden" name="redirectPage" value="DisplayClient.jsp">
 
-            <div class="half-width">
-                <label class="form-label">Date of Birth</label>
-                <input type="date" class="form-control" readonly
-                       value="<%= session.getAttribute("dob") != null ? session.getAttribute("dob") : "" %>">
-            </div>
+            <!-- 1st Line: Account Number and Status -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label>Account Number <span class="required-star">*</span></label>
+        <input type="text" class="form-control input-light" name="accountNumber" id="accountNumber" maxlength="6"
+               pattern="[A-Za-z0-9]{1,6}"
+               value="<%= session.getAttribute("accountNumber") != null ? session.getAttribute("accountNumber") : "" %>"
+               oninput="this.value=this.value.toUpperCase()">
+        <div class="field-error" id="clientError">
+            <%= session.getAttribute("clientError") != null ? session.getAttribute("clientError") : "" %>
         </div>
+    </div>
+    <div class="col-md-6">
+        <label>Status</label>
+        <input type="text" class="form-control input-light" readonly
+               value="<%= session.getAttribute("status") != null ? session.getAttribute("status") : "" %>">
+    </div>
+</div>
 
-        <!-- Phone & Email -->
-        <div class="form-row">
-            <div>
-                <label class="form-label">Phone Number</label>
-                <input type="text" class="form-control" readonly maxlength="15"
-                       value="<%= session.getAttribute("phone") != null ? session.getAttribute("phone") : "" %>">
+            <!-- 2nd Line: Full Name and DOB -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label>Full Name</label>
+                    <input type="text" class="form-control input-light" readonly maxlength="30"
+                           value="<%= session.getAttribute("fullName") != null ? session.getAttribute("fullName") : "" %>">
+                </div>
+                <div class="col-md-6">
+                    <label>Date of Birth</label>
+                    <input type="date" class="form-control input-light" readonly
+                           value="<%= session.getAttribute("dob") != null ? session.getAttribute("dob") : "" %>">
+                </div>
             </div>
-            <div>
-                <label class="form-label">Email</label>
-                <input type="email" class="form-control" readonly maxlength="40"
-                       value="<%= session.getAttribute("email") != null ? session.getAttribute("email") : "" %>">
-            </div>
-        </div>
 
-        <!-- Address -->
-        <div class="form-row">
-            <div><label class="form-label">Address Line 1</label>
-                <input type="text" class="form-control" readonly
-                       value="<%= session.getAttribute("addressLine1") != null ? session.getAttribute("addressLine1") : "" %>">
+            <!-- 3rd Line: Phone and Email -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label>Phone Number</label>
+                    <input type="text" class="form-control input-light" readonly maxlength="15"
+                           value="<%= session.getAttribute("phone") != null ? session.getAttribute("phone") : "" %>">
+                </div>
+                <div class="col-md-6">
+                    <label>Email</label>
+                    <input type="email" class="form-control input-light" readonly maxlength="40"
+                           value="<%= session.getAttribute("email") != null ? session.getAttribute("email") : "" %>">
+                </div>
             </div>
-        </div>
 
-        <div class="form-row">
-            <div><label class="form-label">Address Line 2</label>
-                <input type="text" class="form-control" readonly
-                       value="<%= session.getAttribute("addressLine2") != null ? session.getAttribute("addressLine2") : "" %>">
+            <!-- 4th Line: Gender -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label>Gender</label>
+                    <input type="text" class="form-control input-light" readonly
+                           value="<%= "M".equals(session.getAttribute("gender")) ? "Male" :
+                                   ("F".equals(session.getAttribute("gender")) ? "Female" :
+                                   ("T".equals(session.getAttribute("gender")) ? "Transgender" : "")) %>">
+                </div>
             </div>
-        </div>
 
-        <div class="form-row">
-            <div><label class="form-label">Address Line 3</label>
-                <input type="text" class="form-control" readonly
-                       value="<%= session.getAttribute("addressLine3") != null ? session.getAttribute("addressLine3") : "" %>">
+            <!-- 5th Line: Address Line 1 -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label>Address Line 1</label>
+                    <input type="text" class="form-control input-light" readonly
+                           value="<%= session.getAttribute("addressLine1") != null ? session.getAttribute("addressLine1") : "" %>">
+                </div>
             </div>
-            <div><label class="form-label">Pincode</label>
-                <input type="text" class="form-control" readonly maxlength="6"
-                       value="<%= session.getAttribute("pincode") != null ? session.getAttribute("pincode") : "" %>">
-            </div>
-        </div>
 
-        <div class="form-row">
-            <div><label class="form-label">City</label>
-                <input type="text" class="form-control" readonly
-                       value="<%= session.getAttribute("city") != null ? session.getAttribute("city") : "" %>">
+            <!-- 6th Line: Address Line 2 -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label>Address Line 2</label>
+                    <input type="text" class="form-control input-light" readonly
+                           value="<%= session.getAttribute("addressLine2") != null ? session.getAttribute("addressLine2") : "" %>">
+                </div>
             </div>
-            <div><label class="form-label">State</label>
-                <input type="text" class="form-control" readonly
-                       value="<%= session.getAttribute("state") != null ? session.getAttribute("state") : "" %>">
-            </div>
-            <div><label class="form-label">Country</label>
-                <input type="text" class="form-control" readonly
-                       value="<%= session.getAttribute("country") != null ? session.getAttribute("country") : "" %>">
-            </div>
-        </div>
 
-        <!-- Account Type & Currency -->
-        <div class="form-row">
-            <div><label class="form-label">Preferred Account Type</label>
-                <input type="text" class="form-control" readonly
-                       value="<%= session.getAttribute("accountType") != null ? session.getAttribute("accountType") : "" %>">
+            <!-- 7th Line: Address Line 3, Pincode and City -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label>Address Line 3</label>
+                    <input type="text" class="form-control input-light" readonly
+                           value="<%= session.getAttribute("addressLine3") != null ? session.getAttribute("addressLine3") : "" %>">
+                </div>
+                <div class="col-md-4">
+                    <label>Pincode</label>
+                    <input type="text" class="form-control input-light" readonly maxlength="6"
+                           value="<%= session.getAttribute("pincode") != null ? session.getAttribute("pincode") : "" %>">
+                </div>
+                <div class="col-md-4">
+                    <label>City</label>
+                    <input type="text" class="form-control input-light" readonly
+                           value="<%= session.getAttribute("city") != null ? session.getAttribute("city") : "" %>">
+                </div>
             </div>
-            <div><label class="form-label">Preferred Currency</label>
-                <input type="text" class="form-control" readonly
-                       value="<%= session.getAttribute("currency") != null ? session.getAttribute("currency") : "" %>">
-            </div>
-        </div>
 
-        <!-- ID -->
-        <div class="form-row">
-            <div><label class="form-label">ID Type</label>
-                <input type="text" class="form-control" readonly
-                       value="<%= session.getAttribute("idType") != null ? session.getAttribute("idType") : "" %>">
+            <!-- 8th Line: State and Country -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label>State</label>
+                    <input type="text" class="form-control input-light" readonly
+                           value="<%= session.getAttribute("state") != null ? session.getAttribute("state") : "" %>">
+                </div>
+                <div class="col-md-6">
+                    <label>Country</label>
+                    <input type="text" class="form-control input-light" readonly
+                           value="<%= session.getAttribute("country") != null ? session.getAttribute("country") : "" %>">
+                </div>
             </div>
-            <div><label class="form-label">ID Number</label>
-                <input type="text" class="form-control" readonly
-                       value="<%= session.getAttribute("idNumber") != null ? session.getAttribute("idNumber") : "" %>">
+
+            <!-- 9th Line: Account Type and Currency -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label>Preferred Account Type</label>
+                    <input type="text" class="form-control input-light" readonly
+                           value="<%= session.getAttribute("accountType") != null ? session.getAttribute("accountType") : "" %>">
+                </div>
+                <div class="col-md-6">
+                    <label>Preferred Currency</label>
+                    <input type="text" class="form-control input-light" readonly
+                           value="<%= session.getAttribute("currency") != null ? session.getAttribute("currency") : "" %>">
+                </div>
             </div>
-        </div>
 
-        <div class="text-center mt-3">
-            <button type="submit" class="btn btn-primary btn-sm">Fetch Client Details</button>
-            <button type="button" class="btn btn-secondary btn-sm" id="clearBtn">Clear</button>
-        </div>
+            <!-- 10th Line: ID Type and ID Number -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label>ID Type</label>
+                    <input type="text" class="form-control input-light" readonly
+                           value="<%= session.getAttribute("idType") != null ? session.getAttribute("idType") : "" %>">
+                </div>
+                <div class="col-md-6">
+                    <label>ID Number</label>
+                    <input type="text" class="form-control input-light" readonly
+                           value="<%= session.getAttribute("idNumber") != null ? session.getAttribute("idNumber") : "" %>">
+                </div>
+            </div>
 
-        <%
-            // Clear session attributes
-            String[] attrs = { "accountNumber","clientError","fullName","dob","phone","email","gender",
-                               "addressLine1","addressLine2","addressLine3","pincode","city","state",
-                               "country","accountType","currency","idType","idNumber"};
-            for(String a : attrs) session.removeAttribute(a);
-        %>
-    </form>
+            <!-- Buttons -->
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-primary btn-sm">Fetch Client Details</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="clearBtn">Clear</button>
+            </div>
+
+            <%
+                // Clear session attributes after showing
+                String[] attrs = { "accountNumber","clientError","fullName","dob","phone","email","gender",
+                                   "addressLine1","addressLine2","addressLine3","pincode","city","state",
+                                   "country","accountType","currency","idType","idNumber","status"};
+                for(String a : attrs) session.removeAttribute(a);
+            %>
+        </form>
+    </div>
 </div>
 
 <script>
+    // Sidebar toggle
     const hamburgerBtn = document.getElementById("hamburgerBtn");
     const sidebar = document.getElementById("sidebar");
-    const content = document.querySelector('.content');
+    const mainContent = document.getElementById("mainContent");
 
     hamburgerBtn.addEventListener("click", () => {
         sidebar.classList.toggle("active");
-        content.classList.toggle("shift");
+        mainContent.classList.toggle("shift");
     });
 
+    // Form validation & clear button
     const form = document.getElementById("clientForm");
     const accountNumber = document.getElementById("accountNumber");
     const clientError = document.getElementById("clientError");

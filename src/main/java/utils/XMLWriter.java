@@ -21,19 +21,20 @@ import com.ibm.as400.access.ProgramParameter;
 
 public class XMLWriter {
 
-    // --- Helper to get AS400 system from JVM system properties (Render-safe) ---
     private static AS400 getAS400System() {
         String host = System.getProperty("AS400_HOST");
         String user = System.getProperty("AS400_USER");
         String password = System.getProperty("AS400_PASSWORD");
 
+        if (host == null) host = System.getenv("AS400_HOST");
+        if (user == null) user = System.getenv("AS400_USER");
+        if (password == null) password = System.getenv("AS400_PASSWORD");
+
         if (host == null || user == null || password == null) {
-            throw new RuntimeException(
-                "AS400 system properties not configured. " +
-                "Check JAVA_OPTS in Render."
-            );
+            throw new RuntimeException("AS400 credentials missing. Check As400Connection configuration.");
         }
 
+        // ⚠️ Do NOT include jdbc:as400:// here
         return new AS400(host, user, password);
     }
 
@@ -75,9 +76,10 @@ public class XMLWriter {
 
     public static Map<String, String> readResponseFromIFS(String responseFilePath) {
         Map<String, String> result = new HashMap<>();
-        AS400 system = getAS400System();
+        AS400 system = null;
 
         try {
+            system = getAS400System();
             IFSFile file = new IFSFile(system, responseFilePath);
             InputStreamReader reader = new InputStreamReader(new IFSFileInputStream(file), "Cp037");
 
@@ -104,7 +106,7 @@ public class XMLWriter {
             result.put("responseMessage", "Error");
             result.put("responseCode", "Error");
         } finally {
-            system.disconnectAllServices();
+            if (system != null) system.disconnectAllServices();
         }
 
         return result;

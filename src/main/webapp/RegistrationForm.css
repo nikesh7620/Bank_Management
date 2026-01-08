@@ -1,17 +1,92 @@
-/* ===============================
-   ACCOUNT REGISTRATION FORM
-   Compact Modern Banking UI
-=================================*/
-
+/* ==============================
+   GLOBAL STYLES
+============================== */
 body {
     background-color: #f2f7fc;
     font-family: "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
-/* Main Form Box */
+/* Links */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+/* ==============================
+   SIDEBAR
+============================== */
+.sidebar {
+    height: 100vh;
+    width: 200px;
+    background-color: #000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 60px;
+    overflow-x: hidden;
+    z-index: 999;
+    transition: 0.3s;
+}
+
+.sidebar a {
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    font-size: 14px;
+    margin: 5px 0;
+    border-radius: 4px;
+}
+
+.sidebar a i {
+    margin-right: 10px;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+/* Hamburger */
+.hamburger {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    font-size: 24px;
+    color: #fff;
+    background-color: #0d6efd;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+/* ==============================
+   CONTENT AREA
+============================== */
+.content {
+    margin-left: 200px;
+    transition: 0.3s;
+}
+
+.content.shift {
+    margin-left: 200px;
+}
+
+/* ==============================
+   FORM CONTAINER
+============================== */
 .form-container {
     max-width: 900px;
-    margin: 40px auto;
+    margin: 60px auto;
     background: #ffffff;
     padding: 30px 40px;
     border-radius: 12px;
@@ -19,7 +94,6 @@ body {
     border-top: 6px solid #0a6ebd;
 }
 
-/* Title Bar */
 .form-title {
     background: #0a6ebd;
     color: white;
@@ -33,24 +107,27 @@ body {
     margin-bottom: 30px;
 }
 
-/* Input Fields — COMPACT */
+/* ==============================
+   INPUTS
+============================== */
 .input-light,
 .form-control {
     background: #e8f6ff !important;
     border: 1px solid #bcdffc;
-    height: 30px !important;     /* <<< Perfect small height */
-    padding: 2px 8px !important; /* <<< Compact padding */
+    height: 36px !important;
+    padding: 6px 10px !important;
     border-radius: 5px;
     font-size: 13px;
     transition: 0.2s ease-in-out;
+    width: 100%;
 }
 
-/* Focus effect */
 .input-light:focus,
 .form-control:focus {
     background: #ffffff !important;
     border-color: #0a6ebd !important;
     box-shadow: 0 0 4px rgba(10,110,189,0.35);
+    outline: none;
 }
 
 /* Labels */
@@ -61,33 +138,180 @@ label {
     color: #003b66;
 }
 
-/* Radio groups */
-.radio-group {
+/* ==============================
+   REQUIRED FIELD STAR
+============================== */
+label .required-star {
+    color: #dc3545 !important; /* red */
+    font-weight: bold !important; /* bold */
+}
+
+/* Field error messages */
+.field-error {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+/* ==============================
+   RADIO BUTTONS
+============================== */
+.radio-group,
+.radio-inline {
     display: flex;
     align-items: center;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
-/* Dropdowns */
-select.input-light {
-    height: 30px !important;
-    padding: 2px 8px !important;
+/* ==============================
+   SELECT DROPDOWNS
+============================== */
+.custom-select-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
 }
 
-/* Submit Button */
+.custom-select-wrapper select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: #e8f6ff;
+    border: 1px solid #bcdffc;
+    border-radius: 5px;
+    padding: 6px 30px 6px 10px;
+    height: 36px;
+    font-size: 13px;
+    width: 100%;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+
+.custom-select-wrapper::after {
+    content: "\25BC";
+    font-size: 12px;
+    color: #666;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.custom-select-wrapper select:focus {
+    background: #ffffff;
+    border-color: #0a6ebd;
+    box-shadow: 0 0 4px rgba(10,110,189,0.35);
+}
+
+/* ==============================
+   BUTTONS
+============================== */
 .btn-primary {
     background: #0a6ebd;
     border: none;
     padding: 8px 35px;
     font-size: 17px;
     border-radius: 6px;
+    transition: 0.2s;
 }
 
 .btn-primary:hover {
     background: #074f8c;
 }
 
-/* Row spacing */
+/* Secondary button (optional) */
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 20px;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+/* ==============================
+   ROWS AND SPACING
+============================== */
 .row {
     margin-bottom: 12px;
+}
+
+/* ==============================
+   TABLES (for DisplayClient.jsp)
+============================== */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.table th,
+.table td {
+    border: 1px solid #dee2e6;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 13px;
+}
+
+.table th {
+    background-color: #0a6ebd;
+    color: #fff;
+    font-weight: 600;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* ==============================
+   MODAL
+============================== */
+.modal-content {
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.modal-header {
+    background-color: #0a6ebd;
+    color: #fff;
+    border-bottom: none;
+}
+
+.modal-footer {
+    justify-content: center;
+}
+
+.modal-backdrop {
+    background-color: rgba(0,0,0,0.5);
+}
+
+/* ==============================
+   RESPONSIVE
+============================== */
+@media (max-width: 768px) {
+    .sidebar {
+        left: -200px;
+    }
+    .sidebar.active {
+        left: 0;
+    }
+    .content {
+        margin-left: 0;
+    }
+    .content.shift {
+        margin-left: 200px;
+    }
+    .hamburger {
+        display: block;
+    }
+
+    .table th, .table td {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
 }

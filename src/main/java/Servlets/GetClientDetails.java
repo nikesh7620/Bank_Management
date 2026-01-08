@@ -19,9 +19,9 @@ public class GetClientDetails extends HttpServlet {
         String accountNumber = request.getParameter("accountNumber");
         HttpSession session = request.getSession();
 
-        // Clear previous session attributes
+        // Clear previous session attributes except accountNumber (we may want to keep it if not found)
         session.removeAttribute("clientError");
-        session.removeAttribute("accountNumber");
+        session.removeAttribute("status");
         session.removeAttribute("fullName");
         session.removeAttribute("dob");
         session.removeAttribute("phone");
@@ -39,7 +39,10 @@ public class GetClientDetails extends HttpServlet {
         session.removeAttribute("idType");
         session.removeAttribute("idNumber");
 
-        if (accountNumber == null || accountNumber.trim().isEmpty()) {
+        // Keep the accountNumber in session for user convenience
+        if (accountNumber != null && !accountNumber.trim().isEmpty()) {
+            session.setAttribute("accountNumber", accountNumber);
+        } else {
             session.setAttribute("clientError", "Please enter a valid account number");
             response.sendRedirect("DisplayClient.jsp");
             return;
@@ -49,12 +52,21 @@ public class GetClientDetails extends HttpServlet {
              PreparedStatement ps = con.prepareStatement(
                  "SELECT ACCNBR, ACCTYP, CNAME, GENDER, DOB, MOBNBR, EMAIL, " +
                  "ADDR1, ADDR2, ADDR3, CITY, STATE, COUNTRY, PINCDE, " +
-                 "CURR, IDTYP, IDNBR FROM NIKESHM1.CUSTMST WHERE ACCNBR = ?")) {
+                 "CURR, IDTYP, IDNBR, STATUS FROM NIKESHM1.CUSTMST WHERE ACCNBR = ?")) {
 
             ps.setString(1, accountNumber);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    session.setAttribute("accountNumber", rs.getString("ACCNBR"));
+                    // Convert STATUS to human-readable format
+                    String statusCode = rs.getString("STATUS");
+                    String status = "";
+                    if ("A".equalsIgnoreCase(statusCode)) {
+                        status = "Active";
+                    } else if ("I".equalsIgnoreCase(statusCode)) {
+                        status = "Inactive";
+                    }
+                    session.setAttribute("status", status);
+
                     session.setAttribute("accountType", rs.getString("ACCTYP"));
                     session.setAttribute("fullName", rs.getString("CNAME"));
                     session.setAttribute("gender", rs.getString("GENDER"));
@@ -75,6 +87,7 @@ public class GetClientDetails extends HttpServlet {
                     session.setAttribute("idType", rs.getString("IDTYP"));
                     session.setAttribute("idNumber", rs.getString("IDNBR"));
                 } else {
+                    // Keep the accountNumber in session even if not found
                     session.setAttribute("clientError", "Account Number not found");
                 }
             }
